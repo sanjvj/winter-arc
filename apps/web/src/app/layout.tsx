@@ -2,6 +2,7 @@ import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { fontInter, fontSpaceGrotesk, fontJetBrainsMono } from '@/lib/fonts';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/contexts/auth-context';
 import { AuthGate } from '@/components/auth-gate';
 import { AppShell } from '@/components/layout/app-shell';
@@ -26,11 +27,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           storageKey="winter-arc-theme"
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <AuthGate>
-              <AppShell>{children}</AppShell>
-            </AuthGate>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <AuthGate>
+                <AppShell>{children}</AppShell>
+              </AuthGate>
+            </AuthProvider>
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

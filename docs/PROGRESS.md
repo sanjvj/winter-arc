@@ -19,17 +19,21 @@ This document tracks the phased implementation across Prompts 1 through 9.
   - [x] Configure root `package.json` scripts (`lint`, `typecheck`, `test`, `build`).
   - [x] Set up GitHub Actions CI workflow for pull requests and main branch commits.
 
-- [ ] **Prompt 3: Shared Core Domain Package & Unit Test Suite**
-  - [x] Implement Zod schemas for all Firestore documents and boundary payloads (`packages/shared/src/schemas`).
-  - [x] Implement IST calendar utilities (`todayIST()`, formatting, day arithmetic) strictly avoiding unanchored `new Date()`.
-  - [ ] Implement pure business functions:
-    - [ ] Auto-derived daily counters for date $D$ (`problems`, `revisions`, `applications`, `mocks`).
-    - [ ] Daily floor met evaluation (`floorMet(D)`).
-    - [ ] Streak calculation engine (`currentStreak`, `longestStreak`, `totalFloorDays`, `atRisk`).
-    - [ ] Spaced repetition revision engine (intervals `[1, 3, 7, 14, 30]`, mastery, penalty-free overdue queue).
-    - [ ] Pattern coverage calculation against targets.
-    - [ ] Salary normalization to LPA (INR, monthly, USD/EUR/GBP FX conversion).
-  - [x] Author comprehensive Vitest test suite covering all pure domain functions and edge cases.
+- [x] **Prompt 3: Typed Data Access, First-Login Seed & Complete Settings**
+  - [x] Typed data hooks in `apps/web/src/lib/data`: `useDoc`, `useCollection`, `mutations` (`setDocument`, `updateDocument`, `deleteDocument`, `addDocument`), `pagination`, central error handling with toasts.
+  - [x] First-login seed (`seedFirstLogin` in `apps/web/src/lib/data/seed.ts`):
+    - [x] `settings/main`: 13 schedule blocks, 18 pattern targets (sum 168), complete job filters with skill weights and FX rates.
+    - [x] `roadmap/main`: 12 weeks with 3-5 theme-derived goal checkboxes and 36 topics across 6 groups.
+  - [x] Settings page (`/settings`):
+    - [x] Plan length & start date with live "Day X of 90" indicator.
+    - [x] Daily floor minimums and target goals.
+    - [x] Schedule blocks editor (add, remove, move up/down, time validation).
+    - [x] Pattern targets editor with live sum counter (168 target).
+    - [x] Job filters with chip inputs, weight selector, and FX rates.
+    - [x] Appearance theme switcher (dark, light, system).
+    - [x] Account & security: UID copy, API token modal with 32-byte generation and SHA-256 server storage.
+    - [x] Data management: JSON export, dry-run import preview with entity counts, demo data load/clear.
+  - [x] Comprehensive test suite: seeds fixtures, schedule reordering/validation, export/import dry run, API token hashing, and settings schemas (41 unit tests + 5 Firestore rules tests).
 
 - [x] **Prompt 4: Web Application Foundation, Auth & Winter Arc Design System**
   - [x] Initialize Next.js App Router project in `/apps/web` with TypeScript strict mode.

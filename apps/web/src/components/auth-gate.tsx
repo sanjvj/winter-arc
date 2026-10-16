@@ -29,6 +29,13 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       setDeniedEmail(email);
       // Spec: signed-in users whose email is not NEXT_PUBLIC_OWNER_EMAIL are signed out and see "Access denied"
       void signOut();
+    } else if (user.email && isOwner) {
+      // Idempotently ensure initial settings/main and roadmap/main are seeded
+      void import('@/lib/data/seed').then(({ seedFirstLogin }) => {
+        void seedFirstLogin(user.uid).catch((err) => {
+          console.error('[AuthGate] Seed check failed:', err);
+        });
+      });
     }
   }, [user, loading, isOwner, pathname, router, signOut]);
 

@@ -9,7 +9,7 @@
     "build": "pnpm run rules:build && pnpm -r run build",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
-    "test": "pnpm --filter @winter-arc/shared run test",
+    "test": "pnpm -r run test",
     "test:rules": "./scripts/with-env.sh firebase emulators:exec --only firestore \"vitest run tests/rules\"",
     "rules:build": "node scripts/build-rules.js",
     "format": "prettier --write \"{apps,packages,docs,scripts,tests}/**/*.{ts,tsx,js,json,md}\" \"*.{json,js,md}\"",
