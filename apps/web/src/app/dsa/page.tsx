@@ -108,11 +108,11 @@ export default function DsaPage() {
           <button
             type="button"
             onClick={() => setIsAddDrawerOpen(true)}
-            className="px-4 py-1.5 rounded-lg bg-accent-ice text-black text-xs font-display font-semibold hover:opacity-90 flex items-center gap-1.5 transition-opacity"
+            className="px-4 py-1.5 rounded-lg bg-accent-burgundy text-white text-xs font-display font-semibold hover:bg-accent-burgundy-glow flex items-center gap-1.5 transition-all shadow-burgundy"
             title="Add Problem (shortcut 'n')"
           >
             <Plus className="h-4 w-4" /> Add Problem{' '}
-            <kbd className="hidden sm:inline font-mono text-[10px] px-1 bg-black/15 rounded">n</kbd>
+            <kbd className="hidden sm:inline font-mono text-[10px] px-1 bg-white/20 text-white rounded">n</kbd>
           </button>
         </div>
       </div>

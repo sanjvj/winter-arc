@@ -187,7 +187,7 @@ export function ActiveRecallModal({
 
             <button
               onClick={onClose}
-              className="px-6 py-2.5 rounded-lg bg-accent-ice text-black font-display font-semibold text-sm hover:opacity-90 transition-opacity"
+              className="px-6 py-2.5 rounded-lg bg-accent-burgundy text-white font-display font-semibold text-sm hover:bg-accent-burgundy-glow transition-all shadow-burgundy"
             >
               Back to Queue
             </button>

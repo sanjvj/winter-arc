@@ -45,13 +45,15 @@ export function MobileNav() {
     <>
       {/* "More" Drawer Modal */}
       {moreOpen && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-bg/80 backdrop-blur-sm md:hidden">
-          <div className="rounded-t-2xl border-t border-border-token bg-surface p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-border-token">
-              <h3 className="font-display text-sm font-bold text-text">More Command Modules</h3>
+        <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/80 backdrop-blur-md md:hidden">
+          <div className="rounded-t-3xl border-t border-white/10 bg-[#0B0B0F] p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+              <h3 className="font-display text-base font-bold text-white tracking-wide uppercase">
+                Command Modules
+              </h3>
               <button
                 onClick={() => setMoreOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-muted"
+                className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] text-zinc-400 hover:text-white"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -66,10 +68,10 @@ export function MobileNav() {
                     href={item.href}
                     onClick={() => setMoreOpen(false)}
                     className={cn(
-                      'flex items-center gap-2.5 rounded-xl border border-border-token p-3 text-xs font-medium transition-colors',
+                      'flex items-center gap-2.5 rounded-xl border p-3 text-xs font-medium transition-all',
                       isActive
-                        ? 'bg-accent-ice/10 text-accent-ice font-semibold'
-                        : 'bg-surface-2 text-muted hover:text-text',
+                        ? 'border-white/20 bg-[#6D001A] text-white font-semibold shadow-burgundy'
+                        : 'border-white/5 bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06]',
                     )}
                   >
                     <Icon className="h-4 w-4" />
@@ -78,13 +80,13 @@ export function MobileNav() {
                 );
               })}
             </div>
-            <div className="mt-4 pt-4 border-t border-border-token">
+            <div className="mt-4 pt-4 border-t border-white/10">
               <button
                 onClick={() => {
                   setMoreOpen(false);
                   void signOut();
                 }}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-status-danger/20 bg-status-danger/10 py-2.5 text-xs font-semibold text-status-danger"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-status-danger/30 bg-status-danger/10 py-2.5 text-xs font-semibold text-status-danger hover:bg-status-danger/20"
               >
                 <LogOut className="h-4 w-4" />
                 Sign Out
@@ -95,12 +97,12 @@ export function MobileNav() {
       )}
 
       {/* Fixed Mobile Bottom Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-border-token bg-surface px-2 md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-white/10 bg-[#050507]/90 backdrop-blur-xl px-2 md:hidden">
         <Link
           href="/"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            (normalizedPath === '' || normalizedPath === '/') ? 'text-accent-ice' : 'text-muted',
+            (normalizedPath === '' || normalizedPath === '/') ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300',
           )}
         >
           <LayoutDashboard className="h-4 w-4" />
@@ -111,7 +113,7 @@ export function MobileNav() {
           href="/log"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            normalizedPath === '/log' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/log' ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300',
           )}
         >
           <Clock className="h-4 w-4" />
@@ -122,16 +124,16 @@ export function MobileNav() {
         <Link
           href="/log"
           title="Quick Daily Log"
-          className="-mt-5 flex h-12 w-12 items-center justify-center rounded-full bg-accent-ice text-bg shadow-lg shadow-accent-ice/30 transition-transform active:scale-95"
+          className="-mt-6 flex h-13 w-13 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B0022] to-[#6D001A] text-white shadow-burgundy ring-2 ring-white/20 transition-transform active:scale-95 p-3"
         >
-          <Plus className="h-6 w-6 stroke-[2.5]" />
+          <Plus className="h-6 w-6 stroke-[3]" />
         </Link>
 
         <Link
           href="/dsa"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            normalizedPath === '/dsa' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/dsa' ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300',
           )}
         >
           <Code2 className="h-4 w-4" />
@@ -142,7 +144,7 @@ export function MobileNav() {
           href="/jobs"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            normalizedPath === '/jobs' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/jobs' ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300',
           )}
         >
           <Briefcase className="h-4 w-4" />
@@ -153,7 +155,7 @@ export function MobileNav() {
           onClick={() => setMoreOpen(true)}
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            moreOpen ? 'text-accent-ice' : 'text-muted',
+            moreOpen ? 'text-white font-bold' : 'text-zinc-500 hover:text-zinc-300',
           )}
         >
           <Menu className="h-4 w-4" />

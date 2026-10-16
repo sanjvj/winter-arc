@@ -43,9 +43,9 @@ export default function RevisionPage() {
         {queueResult.totalDue > 0 && (
           <button
             onClick={() => setIsReviewOpen(true)}
-            className="px-4 py-2 rounded-lg bg-accent-ice text-black font-display font-semibold text-xs hover:opacity-90 flex items-center gap-1.5 transition-opacity shrink-0"
+            className="px-4 py-2 rounded-lg bg-accent-burgundy text-white font-display font-semibold text-xs hover:bg-accent-burgundy-glow flex items-center gap-1.5 transition-all shrink-0 shadow-burgundy"
           >
-            <Play className="h-4 w-4 fill-black" /> Start Review ({queueResult.totalDue})
+            <Play className="h-4 w-4 fill-white" /> Start Review ({queueResult.totalDue})
           </button>
         )}
       </div>

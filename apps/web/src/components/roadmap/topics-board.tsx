@@ -141,7 +141,7 @@ export const TopicsBoard: React.FC<TopicsBoardProps> = ({
             </button>
             <button
               type="submit"
-              className="rounded-md bg-accent-ice px-3 py-1 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90"
+              className="rounded-md bg-accent-burgundy px-3 py-1 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy"
             >
               Add Topic
             </button>

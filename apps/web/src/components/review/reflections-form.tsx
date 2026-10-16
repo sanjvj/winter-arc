@@ -79,7 +79,7 @@ export const ReflectionsForm: React.FC<ReflectionsFormProps> = ({
           <button
             type="submit"
             disabled={saving}
-            className="inline-flex items-center gap-1.5 rounded-md bg-accent-ice px-3.5 py-1.5 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90 transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-md bg-accent-burgundy px-3.5 py-1.5 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy disabled:opacity-50"
           >
             <Save className="h-3.5 w-3.5" />
             {saving ? 'Saving...' : 'Save Reflections'}

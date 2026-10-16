@@ -113,7 +113,7 @@ export default function JobsPage() {
             type="button"
             onClick={handleSyncJobs}
             disabled={syncing}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-ice text-black text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-all font-mono whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-burgundy text-white text-xs font-semibold hover:bg-accent-burgundy-glow disabled:opacity-50 transition-all font-mono whitespace-nowrap shadow-burgundy"
             title="Fetch latest tech jobs directly from Greenhouse and Lever"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${syncing ? 'animate-spin' : ''}`} />
@@ -141,7 +141,7 @@ export default function JobsPage() {
             onClick={() => setStatusFilter(tab)}
             className={`px-3 py-1.5 rounded-lg capitalize font-mono text-xs transition-colors ${
               statusFilter === tab
-                ? 'bg-accent-ice text-black font-semibold'
+                ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                 : 'bg-surface-2 text-muted hover:text-text border border-border-token'
             }`}
           >
@@ -173,7 +173,7 @@ export default function JobsPage() {
               type="button"
               onClick={handleSyncJobs}
               disabled={syncing}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-ice text-black text-xs font-bold hover:opacity-90 disabled:opacity-50 transition-all font-display"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent-burgundy text-white text-xs font-bold hover:bg-accent-burgundy-glow disabled:opacity-50 transition-all font-display shadow-burgundy"
             >
               <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} />
               {syncing ? 'Scraping Live Boards...' : 'Scrape Live Jobs Now'}
@@ -260,7 +260,7 @@ export default function JobsPage() {
                   <button
                     type="button"
                     onClick={() => handleMarkApplied(job)}
-                    className="px-3 py-1 rounded bg-accent-ice text-black text-xs font-semibold hover:opacity-90 transition-opacity flex items-center gap-1 font-display"
+                    className="px-3 py-1 rounded bg-accent-burgundy text-white text-xs font-semibold hover:bg-accent-burgundy-glow transition-all flex items-center gap-1 font-display shadow-sm"
                   >
                     <Check className="h-3 w-3" /> Mark Applied
                   </button>

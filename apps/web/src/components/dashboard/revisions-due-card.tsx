@@ -37,12 +37,12 @@ export function RevisionsDueCard({ dueCount, loading = false }: RevisionsDueCard
       size="M"
       state={loading ? 'loading' : 'default'}
       className="order-4 xl:order-none"
-      icon={<RotateCcw className="h-4 w-4 text-accent-indigo" />}
+      icon={<RotateCcw className="h-4 w-4 text-accent-burgundy-glow" />}
       title="Spaced Revision"
       action={
         <Link
           href="/revision"
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-accent-indigo text-white font-mono text-xs font-semibold hover:bg-accent-indigo/90 transition-colors shadow-sm"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-accent-burgundy text-white font-mono text-xs font-semibold hover:bg-accent-burgundy-glow transition-colors shadow-burgundy"
         >
           Start
           <ArrowRight className="h-3 w-3" />
@@ -51,7 +51,7 @@ export function RevisionsDueCard({ dueCount, loading = false }: RevisionsDueCard
     >
       <div className="flex flex-col justify-between h-full py-1">
         <div className="flex items-baseline gap-2">
-          <span className="font-display text-4xl font-bold tracking-tight text-accent-indigo">
+          <span className="font-display text-4xl font-bold tracking-tight text-white">
             {dueCount}
           </span>
           <span className="font-mono text-xs text-muted">

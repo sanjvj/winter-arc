@@ -163,7 +163,7 @@ export const QuickAddDrawer: React.FC<QuickAddDrawerProps> = ({
                 onClick={() => setStatus('applied')}
                 className={`rounded px-3 py-1.5 text-xs font-mono transition-colors ${
                   status === 'applied'
-                    ? 'bg-accent-ice text-bg font-semibold'
+                    ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                     : 'bg-surface text-muted hover:text-text border border-border-token'
                 }`}
               >
@@ -174,7 +174,7 @@ export const QuickAddDrawer: React.FC<QuickAddDrawerProps> = ({
                 onClick={() => setStatus('saved')}
                 className={`rounded px-3 py-1.5 text-xs font-mono transition-colors ${
                   status === 'saved'
-                    ? 'bg-accent-ice text-bg font-semibold'
+                    ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                     : 'bg-surface text-muted hover:text-text border border-border-token'
                 }`}
               >
@@ -206,7 +206,7 @@ export const QuickAddDrawer: React.FC<QuickAddDrawerProps> = ({
             <button
               type="submit"
               disabled={saving}
-              className="rounded-md bg-accent-ice px-4 py-2 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90 transition-colors disabled:opacity-50"
+              className="rounded-md bg-accent-burgundy px-4 py-2 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy disabled:opacity-50"
             >
               {saving ? 'Adding...' : 'Add Application'}
             </button>

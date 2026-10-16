@@ -22,7 +22,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-bg">
       <Sidebar />
-      <div className="flex flex-1 flex-col md:pl-64">
+      <div className="flex flex-1 flex-col md:pl-72">
         <Topbar />
         <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8">
           <InAppBanners />

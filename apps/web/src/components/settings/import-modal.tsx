@@ -181,7 +181,7 @@ export function ImportModal({ isOpen, onClose, uid, onSuccess }: ImportModalProp
           <button
             onClick={handleApply}
             disabled={!summary?.valid || isApplying}
-            className="flex items-center gap-2 rounded-xl bg-accent-ice px-4 py-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-accent-burgundy px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-burgundy-glow disabled:opacity-50 shadow-burgundy"
           >
             {isApplying ? (
               <>

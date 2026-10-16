@@ -55,29 +55,32 @@ export default function LoginPage() {
   const isEmulator = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg p-6">
-      <div className="w-full max-w-md rounded-bento border border-border-token bg-surface p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center bg-black p-6 relative overflow-hidden">
+      {/* Background Burgundy Ambient Mesh */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-[#6D001A]/20 blur-[140px]" />
+
+      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#08080C] p-8 shadow-2xl ring-1 ring-white/5">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-ice/10 text-accent-ice">
-            <Flame className="h-6 w-6" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8B0022] to-[#6D001A] text-white shadow-burgundy ring-1 ring-white/20">
+            <Flame className="h-6 w-6 fill-white/20 stroke-[2.2]" />
           </div>
           <div>
-            <span className="font-mono text-xs uppercase tracking-widest text-muted">
-              Personal System
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#A30028]">
+              PROTOCOL CAESAR
             </span>
-            <h1 className="font-display text-xl font-bold tracking-tight text-text">
-              Winter Arc Command Center
+            <h1 className="font-display text-2xl font-black tracking-tight text-white uppercase">
+              Winter Arc
             </h1>
           </div>
         </div>
 
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-relaxed text-zinc-400">
           Single-tenant command dashboard for the 90-day SDE-1 execution sprint. Authorized access
           only.
         </p>
 
         {error && (
-          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-status-danger/20 bg-status-danger/10 p-3 text-xs text-status-danger">
+          <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-status-danger/30 bg-status-danger/10 p-3 text-xs text-status-danger">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -87,7 +90,7 @@ export default function LoginPage() {
           <button
             onClick={handleSignIn}
             disabled={isSigningIn}
-            className="flex w-full items-center justify-center gap-3 rounded-xl bg-accent-ice px-4 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-[#6D001A] to-[#8B0022] px-4 py-3 text-sm font-semibold text-white shadow-burgundy transition-all hover:opacity-95 disabled:opacity-50 ring-1 ring-white/10"
           >
             <ShieldCheck className="h-4 w-4" />
             {isSigningIn ? 'Signing In...' : 'Sign In with Google'}

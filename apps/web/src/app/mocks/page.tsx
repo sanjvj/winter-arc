@@ -162,7 +162,7 @@ export default function MocksPage() {
             setEditingMock(null);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center gap-1.5 rounded-md bg-accent-ice px-4 py-2 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90 transition-colors shadow-sm self-start md:self-auto"
+          className="inline-flex items-center gap-1.5 rounded-md bg-accent-burgundy px-4 py-2 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy self-start md:self-auto"
         >
           <Plus className="h-4 w-4" /> Log Mock Interview
         </button>

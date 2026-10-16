@@ -179,7 +179,7 @@ export const WeeksTimeline: React.FC<WeeksTimelineProps> = ({
                         <button
                           type="button"
                           onClick={() => handleSaveTheme(idx)}
-                          className="rounded bg-accent-ice px-2.5 py-1 text-xs font-mono text-bg font-semibold"
+                          className="rounded bg-accent-burgundy px-2.5 py-1 text-xs font-mono text-white font-semibold hover:bg-accent-burgundy-glow transition-all shadow-sm"
                         >
                           Save
                         </button>

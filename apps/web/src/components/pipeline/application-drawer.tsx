@@ -410,7 +410,7 @@ export const ApplicationDrawer: React.FC<ApplicationDrawerProps> = ({
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-md bg-accent-ice px-4 py-2 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90 transition-colors disabled:opacity-50"
+                className="rounded-md bg-accent-burgundy px-4 py-2 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy disabled:opacity-50"
               >
                 {saving ? 'Saving...' : initialApplication ? 'Update' : 'Add Application'}
               </button>

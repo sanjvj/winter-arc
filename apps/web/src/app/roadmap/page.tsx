@@ -198,7 +198,7 @@ export default function RoadmapPage() {
             onClick={() => setActiveTab('timeline')}
             className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-mono transition-colors ${
               activeTab === 'timeline'
-                ? 'bg-accent-ice text-bg font-semibold shadow-sm'
+                ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                 : 'text-muted hover:text-text'
             }`}
           >
@@ -209,7 +209,7 @@ export default function RoadmapPage() {
             onClick={() => setActiveTab('topics')}
             className={`flex items-center gap-1.5 rounded px-3 py-1.5 text-xs font-mono transition-colors ${
               activeTab === 'topics'
-                ? 'bg-accent-ice text-bg font-semibold shadow-sm'
+                ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                 : 'text-muted hover:text-text'
             }`}
           >

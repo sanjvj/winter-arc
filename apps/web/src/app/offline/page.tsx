@@ -15,7 +15,7 @@ export default function OfflinePage() {
       </p>
       <button
         onClick={() => window.location.reload()}
-        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-ice px-5 py-2.5 text-sm font-semibold text-bg transition hover:opacity-90"
+        className="mt-6 inline-flex items-center gap-2 rounded-xl bg-accent-burgundy px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-accent-burgundy-glow shadow-burgundy"
       >
         <RefreshCw className="h-4 w-4" />
         Retry Connection

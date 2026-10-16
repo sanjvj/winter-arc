@@ -92,7 +92,7 @@ export function TokenModal({ isOpen, onClose, token }: TokenModalProps) {
         <div className="flex justify-end pt-2">
           <button
             onClick={onClose}
-            className="rounded-xl bg-accent-ice px-5 py-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90"
+            className="rounded-xl bg-accent-burgundy px-5 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-burgundy-glow shadow-burgundy"
           >
             I Have Saved My Token
           </button>

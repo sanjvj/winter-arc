@@ -247,7 +247,7 @@ export function PatternCheatSheets() {
                   onClick={() => setSelectedPattern(pattern)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors flex items-center justify-between ${
                     isSelected
-                      ? 'bg-accent-ice text-black font-semibold shadow-sm'
+                      ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
                       : 'text-muted hover:text-text hover:bg-surface-2'
                   }`}
                 >

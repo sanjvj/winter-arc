@@ -266,7 +266,7 @@ export function ProblemTable({
             {problems.length === 0 && (
               <button
                 onClick={onOpenAddDrawer}
-                className="mt-4 px-4 py-2 rounded-lg bg-accent-ice text-black text-xs font-semibold hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+                className="mt-4 px-4 py-2 rounded-lg bg-accent-burgundy text-white text-xs font-semibold hover:bg-accent-burgundy-glow transition-all inline-flex items-center gap-1.5 shadow-burgundy"
               >
                 <Plus className="h-4 w-4" /> Add Problem (shortcut &apos;n&apos;)
               </button>

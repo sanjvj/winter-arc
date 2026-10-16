@@ -313,10 +313,10 @@ export default function DesignSystemPage() {
           <div className="rounded-xl border border-border-token bg-surface p-3 text-center text-muted">
             <span className="font-mono text-[10px]">muted</span>
           </div>
-          <div className="rounded-xl border border-border-token bg-accent-ice p-3 text-center text-bg font-bold">
+          <div className="rounded-xl border border-border-token bg-accent-ice p-3 text-center text-white font-bold">
             <span className="font-mono text-[10px]">accent-ice</span>
           </div>
-          <div className="rounded-xl border border-border-token bg-accent-indigo p-3 text-center text-bg font-bold">
+          <div className="rounded-xl border border-border-token bg-accent-indigo p-3 text-center text-white font-bold">
             <span className="font-mono text-[10px]">accent-indigo</span>
           </div>
           <div className="rounded-xl border border-border-token bg-status-success p-3 text-center text-bg font-bold">

@@ -48,12 +48,12 @@ export function HeroCard({
       size="H"
       state={loading ? 'loading' : 'default'}
       className="order-1 xl:order-none bg-gradient-to-r from-surface via-surface to-surface-2"
-      icon={<Sparkles className="h-4 w-4 text-accent-ice" />}
+      icon={<Sparkles className="h-4 w-4 text-accent-burgundy-glow" />}
       title="Winter Arc Command Center"
       action={
         <Link
           href="/log"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-ice text-background font-mono text-xs font-bold hover:bg-accent-ice/90 transition-all active:scale-95 shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-burgundy text-white font-mono text-xs font-bold hover:bg-accent-burgundy-glow transition-all active:scale-95 shadow-burgundy"
         >
           <Clock className="h-3 w-3" />
           Close the Day
@@ -63,11 +63,11 @@ export function HeroCard({
     >
       <div className="flex flex-col justify-between h-full py-1">
         <div>
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-text">
+          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-white">
             {getGreeting()}, {ownerName || 'Sanjay'}
           </h2>
           <div className="flex items-center gap-2 mt-1">
-            <span className="font-mono text-xs font-semibold text-accent-ice">
+            <span className="font-mono text-xs font-semibold text-accent-burgundy-glow">
               Day {planDay} of {planLengthDays}
             </span>
             <span className="text-muted text-xs">•</span>
@@ -79,7 +79,7 @@ export function HeroCard({
         <div className="space-y-2 mt-3">
           <div className="h-2 w-full rounded-full bg-surface-2 overflow-hidden border border-border-token/40">
             <div
-              className="h-full rounded-full bg-gradient-to-r from-accent-indigo to-accent-ice transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-accent-burgundy to-accent-burgundy-glow transition-all duration-500 shadow-glow"
               style={{ width: `${progressPercent}%` }}
             />
           </div>

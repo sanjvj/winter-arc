@@ -73,7 +73,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
             onClick={() => setSelectedBlockId(block.id)}
             className={`flex-1 min-w-[160px] rounded-md px-3 py-2 text-xs font-mono font-semibold transition-colors text-center ${
               selectedBlockId === block.id
-                ? 'bg-accent-ice text-bg shadow-sm'
+                ? 'bg-accent-burgundy text-white shadow-burgundy'
                 : 'text-muted hover:text-text hover:bg-surface-2'
             }`}
           >

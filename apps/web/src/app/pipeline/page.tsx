@@ -181,12 +181,12 @@ export default function PipelinePage() {
           <button
             type="button"
             onClick={() => setIsQuickAddOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-accent-ice/30 bg-accent-ice/10 px-3.5 py-2 text-xs font-mono text-accent-ice hover:bg-accent-ice/20 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-md border border-accent-burgundy/40 bg-accent-burgundy/10 px-3.5 py-2 text-xs font-mono text-white hover:bg-accent-burgundy/20 transition-colors"
             title="Quick add application (shortcut: A)"
           >
-            <Zap className="h-3.5 w-3.5" />
+            <Zap className="h-3.5 w-3.5 text-accent-burgundy-glow" />
             Quick Add
-            <kbd className="hidden sm:inline-block rounded bg-surface border border-accent-ice/30 px-1 py-0.5 text-[10px] text-accent-ice font-mono">
+            <kbd className="hidden sm:inline-block rounded bg-surface border border-accent-burgundy/40 px-1 py-0.5 text-[10px] text-white font-mono">
               A
             </kbd>
           </button>
@@ -195,7 +195,7 @@ export default function PipelinePage() {
           <button
             type="button"
             onClick={handleAddNew}
-            className="inline-flex items-center gap-1.5 rounded-md bg-accent-ice px-4 py-2 text-xs font-mono font-semibold text-background hover:bg-accent-ice/90 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-md bg-accent-burgundy px-4 py-2 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy"
           >
             <Plus className="h-4 w-4" /> Add Application
           </button>

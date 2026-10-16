@@ -136,7 +136,7 @@ export function QuickAddMistake({ problems, onMistakeAdded }: QuickAddMistakePro
           <button
             type="submit"
             disabled={submitting || !text.trim()}
-            className="px-4 py-2 rounded-lg bg-accent-ice text-black text-xs font-display font-semibold hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0 transition-opacity"
+            className="px-4 py-2 rounded-lg bg-accent-burgundy text-white text-xs font-display font-semibold hover:bg-accent-burgundy-glow disabled:opacity-50 flex items-center justify-center gap-1.5 shrink-0 transition-all shadow-burgundy"
           >
             <Plus className="h-4 w-4" /> Log
           </button>

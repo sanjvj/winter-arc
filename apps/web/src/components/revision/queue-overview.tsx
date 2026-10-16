@@ -122,9 +122,9 @@ export function QueueOverview({
 
           <button
             onClick={onStartReview}
-            className="px-6 py-2.5 rounded-lg bg-accent-ice text-black font-display font-semibold text-xs hover:opacity-90 flex items-center justify-center gap-2 transition-opacity shrink-0 shadow-md"
+            className="px-6 py-2.5 rounded-lg bg-accent-burgundy text-white font-display font-semibold text-xs hover:bg-accent-burgundy-glow flex items-center justify-center gap-2 transition-all shrink-0 shadow-burgundy"
           >
-            <Play className="h-4 w-4 fill-black" /> Start Review Session ({queueResult.totalDue})
+            <Play className="h-4 w-4 fill-white" /> Start Review Session ({queueResult.totalDue})
           </button>
         </div>
       )}

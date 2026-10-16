@@ -263,7 +263,7 @@ export function CsvModal({ isOpen, onClose, existingProblems, onImportComplete }
             type="button"
             onClick={handleCommit}
             disabled={importing || !parseResult || parseResult.valid.length === 0}
-            className="px-5 py-2 rounded-lg text-xs font-medium bg-accent-ice text-black hover:opacity-90 font-display flex items-center gap-1.5 disabled:opacity-50 transition-opacity"
+            className="px-5 py-2 rounded-lg text-xs font-medium bg-accent-burgundy text-white hover:bg-accent-burgundy-glow font-display flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-burgundy"
           >
             {importing ? (
               <span>Importing...</span>

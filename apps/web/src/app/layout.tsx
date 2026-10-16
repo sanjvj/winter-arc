@@ -1,6 +1,6 @@
 import '@/styles/globals.css';
 import type { Metadata, Viewport } from 'next';
-import { fontInter, fontSpaceGrotesk, fontJetBrainsMono } from '@/lib/fonts';
+import { fontAveton, fontInter, fontSpaceGrotesk, fontJetBrainsMono } from '@/lib/fonts';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
 import { AuthProvider } from '@/contexts/auth-context';
@@ -8,7 +8,7 @@ import { AuthGate } from '@/components/auth-gate';
 import { AppShell } from '@/components/layout/app-shell';
 
 export const viewport: Viewport = {
-  themeColor: '#0A0B10',
+  themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
 };
@@ -33,9 +33,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${fontInter.variable} ${fontSpaceGrotesk.variable} ${fontJetBrainsMono.variable}`}
+      className={`${fontAveton.variable} ${fontInter.variable} ${fontSpaceGrotesk.variable} ${fontJetBrainsMono.variable}`}
     >
-      <body className="min-h-screen bg-bg text-text antialiased selection:bg-accent-ice selection:text-bg">
+      <body className="min-h-screen bg-bg text-text antialiased selection:bg-accent-ice selection:text-white">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

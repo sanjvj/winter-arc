@@ -83,7 +83,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
                 setDeniedEmail(null);
                 router.push('/login');
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-ice px-4 py-3 text-sm font-semibold text-bg transition-opacity hover:opacity-90"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-burgundy px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-accent-burgundy-glow shadow-burgundy"
             >
               <LogOut className="h-4 w-4" />
               Sign In With Different Account

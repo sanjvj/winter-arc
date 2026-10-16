@@ -43,9 +43,9 @@ export default function MistakesPage() {
         <button
           type="button"
           onClick={() => setIsWeeklyReviewOpen(true)}
-          className="px-4 py-2 rounded-lg bg-accent-ice text-black text-xs font-display font-semibold hover:opacity-90 flex items-center gap-1.5 transition-opacity shrink-0"
+          className="px-4 py-2 rounded-lg bg-accent-burgundy text-white text-xs font-display font-semibold hover:bg-accent-burgundy-glow flex items-center gap-1.5 transition-all shrink-0 shadow-burgundy"
         >
-          <Play className="h-4 w-4 fill-black" /> Weekly Review ({recentMistakes.length})
+          <Play className="h-4 w-4 fill-white" /> Weekly Review ({recentMistakes.length})
         </button>
       </div>
 

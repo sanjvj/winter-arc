@@ -314,7 +314,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSaveSettings}
           disabled={isSaving}
-          className="flex items-center gap-2 rounded-xl bg-accent-ice px-5 py-2.5 text-xs font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-50 shrink-0"
+          className="flex items-center gap-2 rounded-xl bg-accent-burgundy px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-accent-burgundy-glow disabled:opacity-50 shrink-0 shadow-burgundy"
         >
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save All Changes
@@ -1063,7 +1063,7 @@ export default function SettingsPage() {
           <button
             onClick={handleGenerateToken}
             disabled={isTokenLoading}
-            className="flex items-center gap-2 rounded-xl bg-accent-ice px-4 py-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-xl bg-accent-burgundy px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-accent-burgundy-glow disabled:opacity-50 shadow-burgundy"
           >
             {isTokenLoading ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

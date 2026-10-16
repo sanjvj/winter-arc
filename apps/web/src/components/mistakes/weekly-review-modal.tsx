@@ -163,7 +163,7 @@ export function WeeklyReviewModal({
               <button
                 type="button"
                 onClick={handleMarkAllReviewed}
-                className="px-4 py-2 rounded-lg bg-accent-ice text-black text-xs font-display font-semibold hover:opacity-90 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-lg bg-accent-burgundy text-white text-xs font-display font-semibold hover:bg-accent-burgundy-glow flex items-center gap-1.5 transition-all shadow-burgundy"
               >
                 <CheckCircle2 className="h-4 w-4" /> Mark All Reviewed
               </button>

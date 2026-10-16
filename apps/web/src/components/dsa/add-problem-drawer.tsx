@@ -461,7 +461,7 @@ export function AddProblemDrawer({ isOpen, onClose, onProblemAdded }: AddProblem
               type="button"
               onClick={handleSave}
               disabled={saving || !title.trim()}
-              className="px-5 py-2 rounded-lg text-xs font-medium bg-accent-ice text-black hover:opacity-90 font-display flex items-center gap-1.5 disabled:opacity-50 transition-opacity"
+              className="px-5 py-2 rounded-lg text-xs font-medium bg-accent-burgundy text-white hover:bg-accent-burgundy-glow font-display flex items-center gap-1.5 disabled:opacity-50 transition-all shadow-burgundy"
             >
               {saving ? (
                 <span>Logging...</span>

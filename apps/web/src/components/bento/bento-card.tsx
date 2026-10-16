@@ -45,7 +45,7 @@ export function BentoCard({
   return (
     <div
       className={cn(
-        'group relative flex flex-col justify-between overflow-hidden rounded-bento border border-border-token bg-gradient-to-b from-surface to-surface/90 p-5 transition-all duration-200 hover:-translate-y-[2px] hover:border-border-token/80 hover:shadow-xl',
+        'group relative flex flex-col justify-between overflow-hidden rounded-bento border border-border-token bg-gradient-to-b from-surface to-surface/95 p-5 transition-all duration-300 hover:-translate-y-[2px] hover:border-accent-burgundy/40 hover:shadow-burgundy before:absolute before:inset-x-0 before:top-0 before:h-[1px] before:bg-gradient-to-r before:from-transparent before:via-accent-burgundy-glow/30 before:to-transparent',
         sizeClasses[size],
         className,
       )}
@@ -55,12 +55,12 @@ export function BentoCard({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
           {icon && (
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 text-accent-ice">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 border border-white/5 text-accent-burgundy-glow shadow-sm">
               {icon}
             </span>
           )}
           {title && (
-            <h3 className="font-display text-sm font-semibold tracking-tight text-text">{title}</h3>
+            <h3 className="font-display text-sm font-bold tracking-tight text-white">{title}</h3>
           )}
         </div>
         {action && <div className="flex items-center">{action}</div>}

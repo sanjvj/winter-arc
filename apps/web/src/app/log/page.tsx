@@ -360,9 +360,9 @@ export default function LogPage() {
           <button
             type="button"
             onClick={() => handleCloseDay(false)}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent-ice text-background font-mono text-xs font-bold hover:bg-accent-ice/90 transition-all shadow-md shadow-accent-ice/10 active:scale-95"
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-accent-burgundy text-white font-mono text-xs font-bold hover:bg-accent-burgundy-glow transition-all shadow-burgundy active:scale-95"
           >
-            <Flame className="h-3.5 w-3.5 text-background" />
+            <Flame className="h-3.5 w-3.5 text-white" />
             Close the Day
           </button>
         </div>

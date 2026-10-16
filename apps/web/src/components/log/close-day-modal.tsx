@@ -83,7 +83,7 @@ export function CloseDayModal({
               </button>
               <Link
                 href="/"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-ice text-background font-mono text-xs font-bold hover:bg-accent-ice/90 transition-colors shadow-sm"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-burgundy text-white font-mono text-xs font-bold hover:bg-accent-burgundy-glow transition-all shadow-burgundy"
               >
                 Go to Dashboard
                 <ArrowRight className="h-3.5 w-3.5" />

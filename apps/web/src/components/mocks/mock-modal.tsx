@@ -264,7 +264,7 @@ export const MockModal: React.FC<MockModalProps> = ({ isOpen, onClose, uid, init
                   onClick={() => setScore(val)}
                   className={`flex flex-1 items-center justify-center gap-1 rounded-md py-2 text-sm font-mono font-semibold transition-colors border ${
                     score === val
-                      ? 'bg-accent-ice text-bg border-accent-ice shadow-sm'
+                      ? 'bg-accent-burgundy text-white border-accent-burgundy shadow-burgundy'
                       : 'bg-surface text-muted border-border-token hover:text-text hover:bg-surface-2'
                   }`}
                 >
@@ -429,7 +429,7 @@ export const MockModal: React.FC<MockModalProps> = ({ isOpen, onClose, uid, init
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-md bg-accent-ice px-4 py-2 text-xs font-mono font-semibold text-bg hover:bg-accent-ice/90 transition-colors disabled:opacity-50"
+                className="rounded-md bg-accent-burgundy px-4 py-2 text-xs font-mono font-semibold text-white hover:bg-accent-burgundy-glow transition-all shadow-burgundy disabled:opacity-50"
               >
                 {saving ? 'Saving...' : initialMock ? 'Update Mock' : 'Save Mock'}
               </button>
