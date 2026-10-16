@@ -1,18 +1,19 @@
 import { collection, writeBatch, doc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
-import { Job, isIndiaOrRemote } from '@winter-arc/shared';
+import { Job, isIndiaOrRemote, isEntryLevel, extractExperienceYears } from '@winter-arc/shared';
 
 const SOURCES = [
   { type: 'greenhouse', name: 'Razorpay', token: 'razorpaysoftwareprivatelimited' },
   { type: 'greenhouse', name: 'Groww', token: 'groww' },
   { type: 'greenhouse', name: 'InMobi', token: 'inmobi' },
   { type: 'greenhouse', name: 'Slice', token: 'slice' },
-  { type: 'greenhouse', name: 'Canonical', token: 'canonical' },
   { type: 'greenhouse', name: 'HackerRank', token: 'hackerrank' },
+  { type: 'greenhouse', name: 'Postman', token: 'postman' },
   { type: 'lever', name: 'CRED', company: 'cred' },
   { type: 'lever', name: 'Meesho', company: 'meesho' },
   { type: 'lever', name: 'Paytm', company: 'paytm' },
   { type: 'lever', name: 'Zeta', company: 'zeta' },
+  { type: 'greenhouse', name: 'Canonical', token: 'canonical' },
 ];
 
 const BLACKLIST_KEYWORDS = [
@@ -88,12 +89,17 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
 
         for (const item of jobs) {
           if (!isTargetJob(item.title)) continue;
+          const content = item.content || '';
+          // Strictly allow only entry-level (0-1 yr exp)
+          if (!isEntryLevel(item.title, content)) continue;
+
           const loc = item.location?.name || 'Remote';
           // Strictly allow only India or open Remote roles
           if (!isIndiaOrRemote(loc)) continue;
 
           const postedDate = item.updated_at ? item.updated_at.slice(0, 10) : today;
-          const tags = extractTags(item.title, item.content || '');
+          const tags = extractTags(item.title, content);
+          const expYears = extractExperienceYears(content) || 0;
           const id = `gh-${src.name.toLowerCase()}-${item.id}`;
           collectedJobs.push({
             id,
@@ -106,6 +112,7 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
             status: 'new',
             closed: false,
             tags,
+            experienceMinYears: expYears,
             salaryEstimated: false,
           });
         }
@@ -118,13 +125,17 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
 
         for (const item of list) {
           if (!isTargetJob(item.text)) continue;
+          const desc = item.descriptionPlain || item.description || '';
+          // Strictly allow only entry-level (0-1 yr exp)
+          if (!isEntryLevel(item.text, desc)) continue;
+
           const loc = item.categories?.location || 'Remote';
           // Strictly allow only India or open Remote roles
           if (!isIndiaOrRemote(loc)) continue;
 
           const postedDate = item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : today;
-          const desc = item.descriptionPlain || item.description || '';
           const tags = extractTags(item.text, desc);
+          const expYears = extractExperienceYears(desc) || 0;
           let salaryRaw: string | undefined;
           if (item.salaryRange && (item.salaryRange.min || item.salaryRange.max)) {
             salaryRaw = `${item.salaryRange.currency || 'INR'} ${item.salaryRange.min || ''} - ${item.salaryRange.max || ''}`;
@@ -142,6 +153,7 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
             status: 'new',
             closed: false,
             tags,
+            experienceMinYears: expYears,
             salaryRaw,
             salaryLPA,
             salaryEstimated,
@@ -157,37 +169,57 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
   const batch = writeBatch(db);
   const jobsCol = collection(db, 'users', uid, 'jobs');
 
-  // Purge any existing non-India / non-remote jobs from Firestore collection
+  // Purge any existing non-India / non-remote or non-entry-level (>1 yr) jobs from Firestore
+  const existingStatusMap = new Map<string, string>();
   try {
     const existingSnap = await getDocs(jobsCol);
     for (const d of existingSnap.docs) {
       const data = d.data();
-      if (!isIndiaOrRemote(data.location)) {
+      const notIndiaOrRemote = !isIndiaOrRemote(data.location);
+      const notEntryLevel = !isEntryLevel(data.title || '', '', data.experienceMinYears);
+      if (notIndiaOrRemote || notEntryLevel) {
         batch.delete(d.ref);
+      } else {
+        existingStatusMap.set(d.id, data.status || 'new');
       }
     }
   } catch (err) {
     console.warn('[ClientScraper] Failed to query existing jobs for cleanup:', err);
   }
 
-  const uniqueJobs = Array.from(new Map(collectedJobs.map((j) => [j.id, j])).values()).slice(0, 40);
+  // Unique scraped jobs
+  const uniqueJobs = Array.from(new Map(collectedJobs.map((j) => [j.id, j])).values());
+  let savedCount = 0;
 
   for (const job of uniqueJobs) {
     if (!job.id) continue;
+    const existingStatus = existingStatusMap.get(job.id);
+
+    // CRITICAL: If the user previously dismissed this job, NEVER resurrect it back to 'new'!
+    if (existingStatus === 'dismissed') {
+      continue;
+    }
+
+    // Preserve existing user interactions (e.g. 'saved' or 'applied')
+    const finalStatus = existingStatus || 'new';
+
     const docRef = doc(jobsCol, job.id);
     batch.set(
       docRef,
       {
         ...job,
+        status: finalStatus,
         updatedAt: serverTimestamp(),
       },
       { merge: true },
     );
+    savedCount++;
   }
 
-  if (uniqueJobs.length > 0) {
+  if (savedCount > 0 || existingStatusMap.size > 0) {
     await batch.commit();
   }
 
-  return { totalFetched, totalSaved: uniqueJobs.length };
+  return { totalFetched, totalSaved: savedCount };
 }
+

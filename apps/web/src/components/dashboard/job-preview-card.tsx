@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BentoCard } from '@/components/bento';
 import { Briefcase, ArrowRight, ExternalLink, MapPin } from 'lucide-react';
-import { Job, isIndiaOrRemote } from '@winter-arc/shared';
+import { Job, isIndiaOrRemote, isEntryLevel } from '@winter-arc/shared';
 
 interface JobPreviewCardProps {
   jobs: Job[];
@@ -12,7 +12,9 @@ interface JobPreviewCardProps {
 }
 
 export function JobPreviewCard({ jobs = [], loading = false }: JobPreviewCardProps) {
-  const eligibleJobs = jobs.filter((j) => isIndiaOrRemote(j.location));
+  const eligibleJobs = jobs.filter(
+    (j) => j.status !== 'dismissed' && isIndiaOrRemote(j.location) && isEntryLevel(j.title, '', j.experienceMinYears)
+  );
   const topJobs = eligibleJobs.slice(0, 5);
 
   if (topJobs.length === 0 && !loading) {

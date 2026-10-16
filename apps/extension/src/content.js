@@ -1,0 +1,425 @@
+/**
+ * Winter Arc Chrome Extension - Omni-Form Autofill Content Script
+ * Supports: LinkedIn Easy Apply, Wellfound, Greenhouse, Lever, Ashby, Workday,
+ * SmartRecruiters, BambooHR, and any company career portal.
+ *
+ * Safety Constraint: NEVER auto-submits any application.
+ */
+
+(function () {
+  'use strict';
+
+  // Prevent multiple injections
+  if (window.__WINTER_ARC_AUTOFILL_LOADED__) return;
+  window.__WINTER_ARC_AUTOFILL_LOADED__ = true;
+
+  console.log('[Winter Arc Extension] Content script active on:', window.location.href);
+
+  // Default Fallback Profile (Sanjay Surya)
+  const DEFAULT_PROFILE = {
+    fullName: 'Sanjay Surya',
+    firstName: 'Sanjay',
+    lastName: 'Surya',
+    email: 'sanjaysurya3010@gmail.com',
+    phone: '+91 9876543210',
+    city: 'Bengaluru, India',
+    currentLocation: 'Bengaluru, Karnataka, India',
+    linkedin: 'https://www.linkedin.com/in/sanjaysurya',
+    github: 'https://github.com/sanjvj',
+    portfolio: 'https://winter-arc-c2def.web.app',
+    degree: 'B.Tech in Computer Science and Engineering',
+    college: 'Anna University',
+    gradYear: '2025',
+    cgpa: '8.5',
+    experienceYears: '0',
+    currentRole: 'Software Engineering Intern',
+    currentCompany: 'Winter Arc',
+    noticePeriod: 'Immediate (0 days)',
+    expectedCTC: '12 LPA',
+    currentCTC: 'Fresher',
+    authorizedInIndia: 'Yes',
+    sponsorshipNeeded: 'No',
+    gender: 'Male',
+    summary: 'Full-stack developer (2025 CS graduate) with strong foundations in Data Structures, Algorithms, TypeScript, React, Next.js, and Node.js. Excited to contribute to high-impact product engineering.',
+  };
+
+  /**
+   * Sets value on an input/textarea and triggers React / Vue / Angular synthetic events.
+   */
+  function setNativeValue(element, value) {
+    if (!element || value === undefined || value === null) return false;
+
+    try {
+      element.focus();
+      const proto = Object.getPrototypeOf(element);
+      const desc = Object.getOwnPropertyDescriptor(proto, 'value');
+      const setter = desc?.set || Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+
+      if (setter) {
+        setter.call(element, value);
+      } else {
+        element.value = value;
+      }
+
+      element.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      element.dispatchEvent(new Event('blur', { bubbles: true, composed: true }));
+
+      // Visual highlight
+      element.style.outline = '2px solid #10B981';
+      element.style.transition = 'outline 0.3s ease';
+      setTimeout(() => {
+        element.style.outline = '';
+      }, 4000);
+
+      return true;
+    } catch (e) {
+      console.warn('[Winter Arc] Failed to set native value:', e);
+      return false;
+    }
+  }
+
+  /**
+   * Sets select dropdown to option matching text or value.
+   */
+  function setSelectValue(select, targetTextOrVal) {
+    if (!select || !targetTextOrVal) return false;
+    const target = targetTextOrVal.toLowerCase().trim();
+    let foundIndex = -1;
+
+    for (let i = 0; i < select.options.length; i++) {
+      const opt = select.options[i];
+      const optText = opt.text.toLowerCase().trim();
+      const optVal = opt.value.toLowerCase().trim();
+      if (optText === target || optVal === target || optText.includes(target)) {
+        foundIndex = i;
+        break;
+      }
+    }
+
+    if (foundIndex !== -1) {
+      select.selectedIndex = foundIndex;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      select.style.outline = '2px solid #10B981';
+      setTimeout(() => { select.style.outline = ''; }, 4000);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Selects radio button matching Yes/No or target label.
+   */
+  function setRadioValue(radio, shouldSelect) {
+    if (!radio) return false;
+    if (shouldSelect && !radio.checked) {
+      radio.click();
+      radio.checked = true;
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Extracts all contextual text signals surrounding an element.
+   */
+  function getFieldContext(el) {
+    const signals = [];
+
+    // 1. Attributes
+    if (el.name) signals.push(el.name);
+    if (el.id) signals.push(el.id);
+    if (el.placeholder) signals.push(el.placeholder);
+    if (el.getAttribute('aria-label')) signals.push(el.getAttribute('aria-label'));
+    if (el.getAttribute('data-testid')) signals.push(el.getAttribute('data-testid'));
+    if (el.getAttribute('autocomplete')) signals.push(el.getAttribute('autocomplete'));
+
+    // 2. Explicit label tag (for="id")
+    if (el.id) {
+      try {
+        const labelEl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        if (labelEl) signals.push(labelEl.textContent || '');
+      } catch (e) {
+        // Ignore CSS selector escape errors
+      }
+    }
+
+    // 3. Parent label or container
+    const parentLabel = el.closest('label');
+    if (parentLabel) signals.push(parentLabel.textContent || '');
+
+    // 4. Preceding sibling or nearby header / label element
+    const prev = el.previousElementSibling;
+    if (prev && (prev.tagName === 'LABEL' || prev.tagName === 'SPAN' || prev.tagName === 'P')) {
+      signals.push(prev.textContent || '');
+    }
+
+    // 5. Ancestor container text (first 100 chars, e.g. question header)
+    const container = el.closest('.fb-dash-form-element, .jobs-easy-apply-form-section__grouping, .form-group, .field, div[data-test]');
+    if (container) {
+      const header = container.querySelector('label, h3, h4, span, legend');
+      if (header) signals.push(header.textContent || '');
+    }
+
+    return signals.join(' ').toLowerCase();
+  }
+
+  /**
+   * Main Autofill Engine
+   */
+  function runAutofill(profileData) {
+    const p = { ...DEFAULT_PROFILE, ...profileData };
+    let filledCount = 0;
+
+    // Collect all fillable form elements in the document and open dialogs/modals
+    const inputs = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select'));
+
+    for (const el of inputs) {
+      // Skip if already filled with non-empty user text (unless it's empty)
+      if (el.tagName !== 'SELECT' && el.type !== 'radio' && el.type !== 'checkbox' && el.value && el.value.trim().length > 0) {
+        // Already filled, skip to avoid clobbering custom entries
+        continue;
+      }
+
+      const ctx = getFieldContext(el);
+
+      // --- FIRST NAME ---
+      if (
+        /\b(first[_\s-]?name|given[_\s-]?name|fname)\b/i.test(ctx) &&
+        !/\b(last|middle|full|sur)\b/i.test(ctx)
+      ) {
+        if (setNativeValue(el, p.firstName)) filledCount++;
+        continue;
+      }
+
+      // --- LAST NAME ---
+      if (/\b(last[_\s-]?name|family[_\s-]?name|surname|lname)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.lastName)) filledCount++;
+        continue;
+      }
+
+      // --- FULL NAME ---
+      if (
+        /\b(full[_\s-]?name|applicant[_\s-]?name|candidate[_\s-]?name|legal\s+name|^name$)\b/i.test(ctx) &&
+        !/\b(first|last|middle|user|file|company|org)\b/i.test(ctx)
+      ) {
+        if (setNativeValue(el, p.fullName)) filledCount++;
+        continue;
+      }
+
+      // --- EMAIL ---
+      if (/\b(email|e-mail)\b/i.test(ctx) && el.type !== 'checkbox') {
+        if (setNativeValue(el, p.email)) filledCount++;
+        continue;
+      }
+
+      // --- PHONE / MOBILE ---
+      if (/\b(phone|mobile|contact[_\s-]?number|tel|cell)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.phone)) filledCount++;
+        continue;
+      }
+
+      // --- LINKEDIN ---
+      if (/linkedin/i.test(ctx)) {
+        if (setNativeValue(el, p.linkedin)) filledCount++;
+        continue;
+      }
+
+      // --- GITHUB ---
+      if (/github/i.test(ctx)) {
+        if (setNativeValue(el, p.github)) filledCount++;
+        continue;
+      }
+
+      // --- PORTFOLIO / WEBSITE ---
+      if (/\b(portfolio|website|personal[_\s-]?url|web[_\s-]?page|blog)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.portfolio)) filledCount++;
+        continue;
+      }
+
+      // --- CITY / LOCATION ---
+      if (/\b(city|current[_\s-]?location|current[_\s-]?city|residence)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.city)) filledCount++;
+        continue;
+      }
+
+      // --- DEGREE / MAJOR ---
+      if (/\b(degree|major|qualification|discipline|field\s+of\s+study|stream)\b/i.test(ctx)) {
+        if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, 'bachelor')) filledCount++;
+        } else {
+          if (setNativeValue(el, p.degree)) filledCount++;
+        }
+        continue;
+      }
+
+      // --- UNIVERSITY / COLLEGE ---
+      if (/\b(university|college|school|institution)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.college)) filledCount++;
+        continue;
+      }
+
+      // --- GRADUATION YEAR ---
+      if (/\b(graduat(ion|e)[_\s-]?year|passing[_\s-]?year|year\s+of\s+passing|completion\s+year)\b/i.test(ctx)) {
+        if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, p.gradYear)) filledCount++;
+        } else {
+          if (setNativeValue(el, p.gradYear)) filledCount++;
+        }
+        continue;
+      }
+
+      // --- CGPA / GPA ---
+      if (/\b(cgpa|gpa|percentage|marks)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.cgpa)) filledCount++;
+        continue;
+      }
+
+      // --- YEARS OF EXPERIENCE QUESTIONS (LinkedIn / Custom) ---
+      // E.g. "How many years of work experience do you have with React?"
+      if (
+        /\b(how\s+many\s+years|years\s+of\s+(work\s+)?experience|total\s+experience|relevant\s+experience)\b/i.test(ctx) &&
+        (el.type === 'number' || el.type === 'text' || el.tagName === 'SELECT')
+      ) {
+        if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, '0') || setSelectValue(el, '1')) filledCount++;
+        } else {
+          // Fill 0 or 1 for entry level
+          if (setNativeValue(el, p.experienceYears || '0')) filledCount++;
+        }
+        continue;
+      }
+
+      // --- NOTICE PERIOD ---
+      if (/\b(notice\s*period|availability|serving\s*notice|how\s+soon)\b/i.test(ctx)) {
+        if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, 'immediate') || setSelectValue(el, '0')) filledCount++;
+        } else {
+          if (setNativeValue(el, p.noticePeriod)) filledCount++;
+        }
+        continue;
+      }
+
+      // --- EXPECTED CTC / SALARY ---
+      if (/\b(expected\s*(ctc|salary|compensation|package)|target\s*salary)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.expectedCTC)) filledCount++;
+        continue;
+      }
+
+      // --- CURRENT CTC ---
+      if (/\b(current\s*(ctc|salary|compensation|package))\b/i.test(ctx)) {
+        if (setNativeValue(el, p.currentCTC)) filledCount++;
+        continue;
+      }
+
+      // --- WORK AUTHORIZATION (Radio / Select / Checkbox) ---
+      if (/\b(authorized\s+to\s+work|legally\s+authorized|work\s+permit|eligible\s+to\s+work)\b/i.test(ctx)) {
+        if (el.type === 'radio') {
+          const radioCtx = getFieldContext(el);
+          if (/\byes\b/i.test(radioCtx) || el.value === 'yes' || el.value === '1') {
+            if (setRadioValue(el, true)) filledCount++;
+          }
+        } else if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, 'yes')) filledCount++;
+        }
+        continue;
+      }
+
+      // --- VISA SPONSORSHIP REQUIREMENT ---
+      if (/\b(require\s+sponsorship|visa\s+sponsorship|need\s+sponsorship)\b/i.test(ctx)) {
+        if (el.type === 'radio') {
+          const radioCtx = getFieldContext(el);
+          if (/\bno\b/i.test(radioCtx) || el.value === 'no' || el.value === '0') {
+            if (setRadioValue(el, true)) filledCount++;
+          }
+        } else if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, 'no')) filledCount++;
+        }
+        continue;
+      }
+
+      // --- GENDER ---
+      if (/\b(gender|sex)\b/i.test(ctx)) {
+        if (el.tagName === 'SELECT') {
+          if (setSelectValue(el, 'male') || setSelectValue(el, 'prefer not')) filledCount++;
+        } else if (el.type === 'radio') {
+          if (/\bmale\b/i.test(ctx)) {
+            if (setRadioValue(el, true)) filledCount++;
+          }
+        }
+        continue;
+      }
+
+      // --- SUMMARY / COVER LETTER / NOTES ---
+      if (el.tagName === 'TEXTAREA' && /\b(summary|cover\s*letter|tell\s+us|notes|additional)\b/i.test(ctx)) {
+        if (setNativeValue(el, p.summary)) filledCount++;
+        continue;
+      }
+    }
+
+    // Show floating on-page toast notification
+    showOnPageToast(filledCount);
+
+    return filledCount;
+  }
+
+  /**
+   * Floating Toast Notification on Webpage
+   */
+  function showOnPageToast(count) {
+    const existing = document.getElementById('winter-arc-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'winter-arc-toast';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '24px';
+    toast.style.right = '24px';
+    toast.style.zIndex = '9999999';
+    toast.style.backgroundColor = '#0A0B10';
+    toast.style.color = '#FFFFFF';
+    toast.style.border = '1px solid #6D001A';
+    toast.style.borderRadius = '12px';
+    toast.style.padding = '14px 18px';
+    toast.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    toast.style.fontSize = '13px';
+    toast.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(109, 0, 26, 0.4)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '10px';
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    toast.style.transform = 'translateY(0)';
+
+    toast.innerHTML = `
+      <span style="display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:#6D001A;color:#FFF;border-radius:6px;font-weight:bold;font-size:12px;">⚡</span>
+      <div>
+        <div style="font-weight:600;color:#FFF;">Winter Arc Autofill</div>
+        <div style="color:#A1A1AA;font-size:11px;">
+          ${count > 0 ? `Autofilled <strong>${count}</strong> field${count > 1 ? 's' : ''} on this form.` : 'No empty matching fields detected on this page.'}
+        </div>
+      </div>
+      <button style="margin-left:8px;background:none;border:none;color:#71717A;cursor:pointer;font-size:14px;" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }
+    }, 4500);
+  }
+
+  // Listen for messages from popup or background service worker
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'AUTOFILL') {
+      const count = runAutofill(message.profile || {});
+      sendResponse({ success: true, count: count });
+    }
+    return true;
+  });
+
+})();

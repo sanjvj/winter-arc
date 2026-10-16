@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { RawJob, ScoredJob } from './types';
-import { isIndiaOrRemote } from '@winter-arc/shared';
+import { isIndiaOrRemote, isEntryLevel } from '@winter-arc/shared';
 
 const BLACKLIST_KEYWORDS = [
   'senior',
@@ -146,6 +146,11 @@ export function scoreAndFilterJob(raw: RawJob, maxDaysOld = 30): ScoredJob | nul
 
   // 2.5. Location Filter: Only accept jobs in India or open Remote roles
   if (!isIndiaOrRemote(raw.location)) {
+    return null;
+  }
+
+  // 2.6. Entry-Level Filter: Exclude roles requiring >1 year experience or level 2+
+  if (!isEntryLevel(raw.title, raw.description)) {
     return null;
   }
 

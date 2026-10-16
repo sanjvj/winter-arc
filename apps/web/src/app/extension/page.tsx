@@ -26,36 +26,41 @@ export default function ExtensionPage() {
           <strong className="text-text">No, it is completely optional.</strong> Your Winter Arc Command Center operates 100% standalone for DSA problem tracking, spaced repetition revisions, mock interviews, roadmap milestones, and curated job feeds.
         </p>
         <p className="text-sm text-muted leading-relaxed">
-          The Chrome extension is a productivity tool: when you click to apply to an opening on Greenhouse, Lever, Ashby, or Workday, pressing <kbd className="px-1.5 py-0.5 rounded bg-surface-2 border border-border-token font-mono text-xs text-text">Alt+Shift+F</kbd> auto-fills your name, contact info, education (CGPA, degree), work experience, notice period, links (GitHub/LinkedIn), and answer bank so you never re-type them.
+          The Chrome extension is a productivity tool: when you open a job application on <strong className="text-text">LinkedIn (Easy Apply)</strong>, <strong className="text-text">Wellfound</strong>, or <strong className="text-text">any company career portal</strong> (Greenhouse, Lever, Ashby, Workday, etc.), click the extension or press <kbd className="px-1.5 py-0.5 rounded bg-surface-2 border border-border-token font-mono text-xs text-text">Alt+Shift+F</kbd> to automatically populate your name, email, phone, education, experience, notice period, portfolio links, and answers in 1 click.
         </p>
+        <div className="p-3 rounded-lg bg-surface-2 border border-border-token text-xs text-muted flex items-center gap-2">
+          <ShieldCheck className="h-4 w-4 text-status-success shrink-0" />
+          <span><strong className="text-text">Safety Guarantee:</strong> The extension only fills detected inputs. It will <strong className="text-text">never auto-submit</strong> your application, giving you 100% control to review before applying.</span>
+        </div>
       </div>
 
       {/* How to Install Guide */}
       <div className="rounded-bento border border-border-token bg-surface p-6 space-y-4">
         <h2 className="font-display text-xl font-semibold text-text flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-status-success" /> How to Install the Extension in Chrome
+          <ShieldCheck className="h-5 w-5 text-status-success" /> How to Setup in Chrome (Takes 30 Seconds)
         </h2>
 
         <ol className="space-y-3 text-sm text-muted list-decimal list-inside leading-relaxed">
           <li>
-            <strong className="text-text">Build the extension package:</strong> Run <code className="px-2 py-0.5 rounded bg-surface-2 font-mono text-xs text-text">pnpm --filter @winter-arc/extension build</code> in your terminal.
-          </li>
-          <li>
-            <strong className="text-text">Open Chrome Extensions:</strong> In Google Chrome, navigate to <code className="px-2 py-0.5 rounded bg-surface-2 font-mono text-xs text-text">chrome://extensions</code> in your address bar.
+            <strong className="text-text">Open Chrome Extensions:</strong> In Google Chrome, go to <code className="px-2 py-0.5 rounded bg-surface-2 font-mono text-xs text-text">chrome://extensions</code> in your address bar.
           </li>
           <li>
             <strong className="text-text">Enable Developer Mode:</strong> Toggle the switch in the top-right corner labelled <span className="text-text font-semibold">&ldquo;Developer mode&rdquo;</span>.
           </li>
           <li>
-            <strong className="text-text">Click Load unpacked:</strong> Click the <span className="text-text font-semibold">&ldquo;Load unpacked&rdquo;</span> button in the top-left corner.
+            <strong className="text-text">Click Load Unpacked:</strong> Click the <span className="text-text font-semibold">&ldquo;Load unpacked&rdquo;</span> button in the top-left corner.
           </li>
           <li>
-            <strong className="text-text">Select the extension folder:</strong> Choose the <code className="px-2 py-0.5 rounded bg-surface-2 font-mono text-xs text-text">apps/extension/dist</code> directory from your local repository.
+            <strong className="text-text">Select Extension Folder:</strong> Select the directory:
+            <div className="mt-1 p-2 rounded bg-surface-2 font-mono text-xs text-text border border-border-token select-all">
+              /home/sanjay/Desktop/apps/extension/dist
+            </div>
           </li>
           <li>
-            <strong className="text-text">Connect to Dashboard:</strong> Click the extension icon in Chrome toolbar, open Options, enter your Dashboard URL (<code className="px-2 py-0.5 rounded bg-surface-2 font-mono text-xs text-text">https://winter-arc-c2def.web.app</code>) and your API Token.
+            <strong className="text-text">Pin & Use:</strong> Pin the Winter Arc extension icon in your Chrome toolbar. When viewing any job application on LinkedIn, Wellfound, or career portals, click the icon and hit <strong className="text-text">&ldquo;⚡ Autofill This Page&rdquo;</strong> (or press <kbd className="px-1.5 py-0.5 rounded bg-surface-2 border border-border-token font-mono text-xs text-text">Alt+Shift+F</kbd>).
           </li>
         </ol>
+
 
         <div className="pt-2">
           <Link

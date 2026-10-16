@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Briefcase, Search, ExternalLink, Bookmark, Check, X, Building2, MapPin, RefreshCw } from 'lucide-react';
-import { Job, JobSchema, todayIST, isIndiaOrRemote } from '@winter-arc/shared';
-import { useCollection, updateDocument, addDocument, syncLiveJobsFromBrowser } from '@/lib/data';
+import { Briefcase, Search, ExternalLink, Bookmark, Check, X, Building2, MapPin, RefreshCw, Trash2 } from 'lucide-react';
+import { Job, JobSchema, todayIST, isIndiaOrRemote, isEntryLevel } from '@winter-arc/shared';
+import { useCollection, updateDocument, addDocument, deleteDocument, syncLiveJobsFromBrowser } from '@/lib/data';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from '@/components/ui/toast';
 
@@ -15,6 +15,7 @@ export default function JobsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'saved' | 'applied' | 'dismissed'>('all');
   const [syncing, setSyncing] = useState(false);
+  const [purging, setPurging] = useState(false);
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
@@ -22,11 +23,18 @@ export default function JobsPage() {
       if (!isIndiaOrRemote(job.location)) {
         return false;
       }
-      // 2. Filter by status tab
-      if (statusFilter !== 'all' && job.status !== statusFilter) {
+      // 2. Enforce Entry-Level filter: strictly <= 1 year experience & entry titles
+      if (!isEntryLevel(job.title, '', job.experienceMinYears)) {
         return false;
       }
-      // 3. Filter by search query
+      // 3. Filter by status tab
+      if (statusFilter === 'all') {
+        // 'All' view shows active jobs (new, saved, applied) and hides dismissed jobs
+        if (job.status === 'dismissed') return false;
+      } else if (job.status !== statusFilter) {
+        return false;
+      }
+      // 4. Filter by search query
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const matchesTitle = job.title.toLowerCase().includes(query);
@@ -37,6 +45,22 @@ export default function JobsPage() {
       return true;
     });
   }, [jobs, statusFilter, searchTerm]);
+
+  const handlePurgeDismissed = async () => {
+    if (!uid) return;
+    const dismissed = jobs.filter((j) => j.status === 'dismissed');
+    if (dismissed.length === 0) return;
+    setPurging(true);
+    let count = 0;
+    for (const j of dismissed) {
+      if (j.id) {
+        await deleteDocument(uid, 'jobs', j.id);
+        count++;
+      }
+    }
+    setPurging(false);
+    toast.success('Dismissed Jobs Cleared', `Permanently removed ${count} dismissed jobs.`);
+  };
 
   const handleSaveJob = async (job: Job) => {
     if (!uid || !job.id) return;
@@ -137,22 +161,44 @@ export default function JobsPage() {
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex items-center gap-2 border-b border-border-token pb-3 text-xs overflow-x-auto">
-        {(['all', 'new', 'saved', 'applied', 'dismissed'] as const).map((tab) => (
+      {/* Filter Tabs & Actions */}
+      <div className="flex items-center justify-between gap-2 border-b border-border-token pb-3 text-xs overflow-x-auto">
+        <div className="flex items-center gap-2">
+          {(['all', 'new', 'saved', 'applied', 'dismissed'] as const).map((tab) => {
+            const count = jobs.filter((j) => {
+              if (!isIndiaOrRemote(j.location) || !isEntryLevel(j.title, '', j.experienceMinYears)) return false;
+              if (tab === 'all') return j.status !== 'dismissed';
+              return j.status === tab;
+            }).length;
+            return (
+              <button
+                key={tab}
+                onClick={() => setStatusFilter(tab)}
+                className={`px-3 py-1.5 rounded-lg capitalize font-mono text-xs transition-colors ${
+                  statusFilter === tab
+                    ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
+                    : 'bg-surface-2 text-muted hover:text-text border border-border-token'
+                }`}
+              >
+                {tab} ({count})
+              </button>
+            );
+          })}
+        </div>
+
+        {statusFilter === 'dismissed' && jobs.some((j) => j.status === 'dismissed') && (
           <button
-            key={tab}
-            onClick={() => setStatusFilter(tab)}
-            className={`px-3 py-1.5 rounded-lg capitalize font-mono text-xs transition-colors ${
-              statusFilter === tab
-                ? 'bg-accent-burgundy text-white font-semibold shadow-sm'
-                : 'bg-surface-2 text-muted hover:text-text border border-border-token'
-            }`}
+            type="button"
+            onClick={handlePurgeDismissed}
+            disabled={purging}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-status-danger/30 bg-status-danger/10 text-status-danger text-xs font-mono hover:bg-status-danger/20 transition-all shrink-0"
           >
-            {tab} ({jobs.filter((j) => (tab === 'all' ? true : j.status === tab)).length})
+            <Trash2 className="h-3 w-3" />
+            {purging ? 'Purging...' : 'Purge All Dismissed'}
           </button>
-        ))}
+        )}
       </div>
+
 
       {/* Job Cards List */}
       {loading ? (

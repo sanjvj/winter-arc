@@ -119,3 +119,74 @@ export function isIndiaOrRemote(rawLocation?: string): boolean {
   // If unspecified or non-matching other country, exclude
   return false;
 }
+
+/**
+ * Disqualifying title patterns for jobs requiring more than 1 year of experience
+ * or non-developer/specialized senior roles.
+ */
+const SENIOR_OR_MID_TITLE_PATTERNS = [
+  /\b(?:sde|swe|engineer|developer|mts|qa|devops|architect|analyst)\s*[-_ ]*(?:ii|iii|iv|v|2|3|4|5|vi)\b/i,
+  /\b(?:level|lvl)\s*[-_ ]*(?:2|3|4|5|ii|iii|iv)\b/i,
+  /\b(?:l2|l3|l4|l5)\b/i,
+  /\b(?:senior|sr\.?|lead|principal|staff|director|head|manager|vp|architect|chief|specialist|expert)\b/i,
+  /\b(?:mid[- ]level|intermediate|experienced)\b/i,
+  /\b(?:sales engineer|field engineer|solutions? architect|customer experience|account executive|talent|recruiter|operations? manager)\b/i,
+];
+
+/**
+ * Extracts minimum years of experience mentioned in text, or null if unspecified.
+ */
+export function extractExperienceYears(text?: string): number | null {
+  if (!text) return null;
+  const lower = text.toLowerCase();
+
+  // Pattern: "X-Y years of experience" or "X to Y years of experience"
+  const rangeMatch = lower.match(/(\d+)\s*(?:-|to)\s*(\d+)\s*(?:years?|yrs?)(?:\s+of)?(?:\s+relevant)?\s+experience/);
+  if (rangeMatch && rangeMatch[1]) {
+    return parseInt(rangeMatch[1], 10);
+  }
+
+  // Pattern: "minimum X years of experience" or "at least X years"
+  const minMatch = lower.match(/(?:minimum|at\s+least|min\.?)\s+(\d+)\s*(?:years?|yrs?)(?:\s+of)?(?:\s+relevant)?\s+experience/);
+  if (minMatch && minMatch[1]) {
+    return parseInt(minMatch[1], 10);
+  }
+
+  // Pattern: "X+ years of experience" or "X years of experience"
+  const singleMatch = lower.match(/(\d+)\+?\s*(?:years?|yrs?)(?:\s+of)?(?:\s+relevant)?\s+experience/);
+  if (singleMatch && singleMatch[1]) {
+    return parseInt(singleMatch[1], 10);
+  }
+
+  return null;
+}
+
+/**
+ * Evaluates whether a job is strictly Entry-Level (0 to 1 year of experience).
+ * Rejects any role requiring >1 year of experience or tagged with mid/senior/Level 2+ titles.
+ */
+export function isEntryLevel(title: string, description?: string, explicitExpYears?: number): boolean {
+  if (explicitExpYears !== undefined && explicitExpYears > 1) {
+    return false;
+  }
+
+  const trimmedTitle = title.trim();
+
+  // 1. Check title for Senior, Lead, Level 2+, or non-entry markers
+  for (const pattern of SENIOR_OR_MID_TITLE_PATTERNS) {
+    if (pattern.test(trimmedTitle)) {
+      return false;
+    }
+  }
+
+  // 2. Check description for experience requirements > 1 year
+  if (description) {
+    const exp = extractExperienceYears(description);
+    if (exp !== null && exp > 1) {
+      return false;
+    }
+  }
+
+  return true;
+}
+

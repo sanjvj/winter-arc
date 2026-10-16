@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { isIndiaOrRemote } from '../src/job-filter';
+import { isIndiaOrRemote, isEntryLevel } from '../src/job-filter';
 
 describe('isIndiaOrRemote', () => {
   it('accepts Indian tech hub cities and country names', () => {
@@ -38,3 +38,34 @@ describe('isIndiaOrRemote', () => {
     expect(isIndiaOrRemote('Singapore')).toBe(false);
   });
 });
+
+describe('isEntryLevel', () => {
+  it('accepts entry-level, junior, intern, and SDE-1 roles', () => {
+    expect(isEntryLevel('Software Engineer')).toBe(true);
+    expect(isEntryLevel('SDE 1')).toBe(true);
+    expect(isEntryLevel('SDE-1')).toBe(true);
+    expect(isEntryLevel('Software Development Engineer Intern')).toBe(true);
+    expect(isEntryLevel('Graduate Software Engineer')).toBe(true);
+    expect(isEntryLevel('Junior Frontend Developer')).toBe(true);
+    expect(isEntryLevel('Associate Software Engineer')).toBe(true);
+    expect(isEntryLevel('Software Engineer', 'Looking for 0-1 years of experience in React')).toBe(true);
+    expect(isEntryLevel('Frontend Engineer', 'Freshers welcome or up to 1 year of experience')).toBe(true);
+  });
+
+  it('rejects mid-level, level 2, senior, lead, staff, or multi-year requirements', () => {
+    expect(isEntryLevel('Software Engineer II')).toBe(false);
+    expect(isEntryLevel('SDE 2')).toBe(false);
+    expect(isEntryLevel('SDE-2')).toBe(false);
+    expect(isEntryLevel('DevOps Engineer II')).toBe(false);
+    expect(isEntryLevel('Senior Backend Engineer')).toBe(false);
+    expect(isEntryLevel('Lead Data Engineer')).toBe(false);
+    expect(isEntryLevel('Staff Engineer')).toBe(false);
+    expect(isEntryLevel('Engineering Manager')).toBe(false);
+    expect(isEntryLevel('Sales Engineer')).toBe(false);
+    expect(isEntryLevel('Software Engineer', 'Requires minimum 3 years of experience')).toBe(false);
+    expect(isEntryLevel('Software Engineer', 'Looking for 2-4 years of experience in Node.js')).toBe(false);
+    expect(isEntryLevel('Fullstack Developer', 'At least 2+ years of experience with PostgreSQL')).toBe(false);
+    expect(isEntryLevel('Software Engineer', undefined, 3)).toBe(false);
+  });
+});
+

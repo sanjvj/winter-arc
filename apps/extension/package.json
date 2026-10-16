@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint src/ --ext .ts",
-    "build": "tsc"
+    "build": "tsc && node scripts/copy-assets.js"
   },
   "dependencies": {
     "@winter-arc/shared": "workspace:*",
