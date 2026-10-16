@@ -4,9 +4,11 @@
  * SmartRecruiters, BambooHR, and any company career portal.
  *
  * Features:
- * - Smart Contextual Note Synthesis for Wellfound: "What interests you about working for this company?"
- * - Optional Live Gemini 1.5 Flash AI generation for tailored cover notes
- * - Safety Constraint: NEVER auto-submits any application.
+ * 1. Adaptive Real-Time Form Learning: Automatically detects and memorizes novel fields (e.g. Age, Pincode)
+ * 2. Learned Field Bank: Auto-fills memorized custom fields on future job applications
+ * 3. Smart Contextual Note Synthesis for Wellfound: "What interests you about working for this company?"
+ * 4. Optional Live Gemini 1.5 Flash AI generation for tailored cover notes
+ * 5. Safety Constraint: NEVER auto-submits any application.
  */
 
 (function () {
@@ -46,6 +48,163 @@
     summary: 'Full-stack developer (2025 CS graduate) with strong foundations in Data Structures, Algorithms, TypeScript, React, Next.js, and Node.js. Excited to contribute to high-impact product engineering.',
     geminiApiKey: '',
   };
+
+  const STANDARD_PATTERNS = [
+    /\b(first[_\s-]?name|given[_\s-]?name|fname)\b/i,
+    /\b(last[_\s-]?name|family[_\s-]?name|surname|lname)\b/i,
+    /\b(full[_\s-]?name|legal\s+name|^name$)\b/i,
+    /\b(email|e-mail)\b/i,
+    /\b(phone|mobile|contact[_\s-]?number|tel|cell)\b/i,
+    /linkedin/i,
+    /github/i,
+    /\b(portfolio|website|personal[_\s-]?url)\b/i,
+    /\b(city|residence)\b/i,
+    /\b(degree|major|qualification)\b/i,
+    /\b(university|college|school)\b/i,
+    /\b(graduat(ion|e)[_\s-]?year|passing[_\s-]?year)\b/i,
+    /\b(cgpa|gpa|percentage)\b/i,
+    /\b(notice\s*period)\b/i,
+    /\b(expected\s*ctc|expected\s*salary)\b/i,
+    /\b(current\s*ctc|current\s*salary)\b/i,
+  ];
+
+  function isStandardField(ctx) {
+    return STANDARD_PATTERNS.some((pat) => pat.test(ctx));
+  }
+
+  function extractSemanticLabel(el) {
+    // 1. Explicit label (for="id")
+    if (el.id) {
+      try {
+        const lbl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
+        if (lbl && lbl.textContent && lbl.textContent.trim().length > 1) {
+          return lbl.textContent.trim();
+        }
+      } catch (e) {}
+    }
+    // 2. Parent label
+    const parentLabel = el.closest('label');
+    if (parentLabel && parentLabel.textContent) {
+      const text = parentLabel.textContent.replace(el.value || '', '').trim();
+      if (text.length > 1 && text.length < 80) return text;
+    }
+    // 3. aria-label
+    if (el.getAttribute('aria-label')) {
+      return el.getAttribute('aria-label').trim();
+    }
+    // 4. placeholder
+    if (el.placeholder && el.placeholder.trim().length > 1) {
+      return el.placeholder.trim();
+    }
+    // 5. Preceding text/label
+    const prev = el.previousElementSibling;
+    if (prev && (prev.tagName === 'LABEL' || prev.tagName === 'SPAN' || prev.tagName === 'P')) {
+      const t = prev.textContent.trim();
+      if (t.length > 1 && t.length < 80) return t;
+    }
+    // 6. Name or ID fallback
+    const raw = el.name || el.id || '';
+    if (raw) {
+      return raw.replace(/[_-]/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+    }
+    return '';
+  }
+
+  function normalizeKey(str) {
+    return str
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .slice(0, 40);
+  }
+
+  /**
+   * Real-time Adaptive Form Learning
+   * Listens to user inputs and memorizes novel fields in chrome.storage.local
+   */
+  function setupAdaptiveLearning() {
+    document.addEventListener(
+      'change',
+      (e) => {
+        const el = e.target;
+        if (!el || (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA' && el.tagName !== 'SELECT')) return;
+        if (el.type === 'password' || el.type === 'hidden' || el.type === 'submit' || el.type === 'button') return;
+
+        const val = (el.value || '').trim();
+        if (!val || val.length === 0 || val.length > 500) return;
+
+        const ctx = getFieldContext(el);
+        // Skip built-in standard fields
+        if (isStandardField(ctx)) return;
+
+        const rawLabel = extractSemanticLabel(el);
+        if (!rawLabel || rawLabel.length < 2) return;
+
+        const key = normalizeKey(rawLabel);
+        if (!key || key.length < 2) return;
+
+        if (chrome && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.get(['winterArcLearnedFields'], (result) => {
+            const learned = result.winterArcLearnedFields || {};
+            const cleanLabel = rawLabel.replace(/[*:]/g, '').trim();
+
+            if (learned[key]?.value !== val) {
+              learned[key] = {
+                key,
+                label: cleanLabel,
+                value: val,
+                updatedAt: new Date().toISOString(),
+              };
+
+              chrome.storage.local.set({ winterArcLearnedFields: learned }, () => {
+                console.log(`[Winter Arc Adaptive] Learned new field: "${cleanLabel}" = "${val}"`);
+                showLearnedToast(cleanLabel, val);
+              });
+            }
+          });
+        }
+      },
+      true,
+    );
+  }
+
+  function showLearnedToast(label, value) {
+    const existing = document.getElementById('winter-arc-learned-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'winter-arc-learned-toast';
+    toast.style.position = 'fixed';
+    toast.style.bottom = '85px';
+    toast.style.right = '24px';
+    toast.style.zIndex = '9999999';
+    toast.style.backgroundColor = '#12141C';
+    toast.style.color = '#FFFFFF';
+    toast.style.border = '1px solid #10B981';
+    toast.style.borderRadius = '10px';
+    toast.style.padding = '10px 14px';
+    toast.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    toast.style.fontSize = '12px';
+    toast.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.5)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '8px';
+    toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+
+    toast.innerHTML = `
+      <span style="color:#10B981;font-size:14px;">✨</span>
+      <div>
+        <span style="color:#A1A1AA;">Winter Arc learned:</span>
+        <strong style="color:#FFFFFF;">${label.slice(0, 25)}</strong> = <span style="color:#7DD3FC;">"${value.slice(0, 20)}"</span>
+      </div>
+    `;
+
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  }
 
   /**
    * Detects Company and Role from active page DOM / title.
@@ -264,9 +423,7 @@ Guidelines:
       try {
         const labelEl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
         if (labelEl) signals.push(labelEl.textContent || '');
-      } catch (e) {
-        // Ignore CSS selector escape errors
-      }
+      } catch (e) {}
     }
 
     // 3. Parent label or container
@@ -296,13 +453,23 @@ Guidelines:
     const p = { ...DEFAULT_PROFILE, ...profileData };
     let filledCount = 0;
 
+    // Load learned fields from chrome storage
+    const learnedFields = await new Promise((resolve) => {
+      if (chrome && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['winterArcLearnedFields'], (res) => {
+          resolve(res.winterArcLearnedFields || {});
+        });
+      } else {
+        resolve({});
+      }
+    });
+
     // Collect all fillable form elements in the document and open dialogs/modals
     const inputs = Array.from(document.querySelectorAll('input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="reset"]), textarea, select'));
 
     for (const el of inputs) {
       // Skip if already filled with non-empty user text (unless it's empty)
       if (el.tagName !== 'SELECT' && el.type !== 'radio' && el.type !== 'checkbox' && el.value && el.value.trim().length > 0) {
-        // Already filled, skip to avoid clobbering custom entries
         continue;
       }
 
@@ -401,7 +568,6 @@ Guidelines:
       }
 
       // --- YEARS OF EXPERIENCE QUESTIONS (LinkedIn / Custom) ---
-      // E.g. "How many years of work experience do you have with React?"
       if (
         /\b(how\s+many\s+years|years\s+of\s+(work\s+)?experience|total\s+experience|relevant\s+experience)\b/i.test(ctx) &&
         (el.type === 'number' || el.type === 'text' || el.tagName === 'SELECT')
@@ -502,6 +668,42 @@ Guidelines:
         if (setNativeValue(el, p.summary)) filledCount++;
         continue;
       }
+
+      // --- MATCH AGAINST ADAPTIVE LEARNED FIELDS BANK ---
+      // E.g. Age, Pincode, Relocation, Father's Name, Custom Questions
+      let matchedLearned = false;
+      for (const [key, item] of Object.entries(learnedFields)) {
+        const itemVal = item.value;
+        const itemLabel = (item.label || key).toLowerCase();
+        const keyPattern = new RegExp(`\\b${key.replace(/_/g, '[_\\s-]?')}\\b`, 'i');
+        const labelPattern = new RegExp(`\\b${itemLabel.replace(/[^a-z0-9]+/gi, '[_\\s-]?')}\\b`, 'i');
+
+        if (keyPattern.test(ctx) || labelPattern.test(ctx)) {
+          if (el.tagName === 'SELECT') {
+            if (setSelectValue(el, itemVal)) {
+              filledCount++;
+              matchedLearned = true;
+              break;
+            }
+          } else if (el.type === 'radio') {
+            const radioCtx = getFieldContext(el);
+            if (radioCtx.includes(itemVal.toLowerCase())) {
+              if (setRadioValue(el, true)) {
+                filledCount++;
+                matchedLearned = true;
+                break;
+              }
+            }
+          } else {
+            if (setNativeValue(el, itemVal)) {
+              filledCount++;
+              matchedLearned = true;
+              break;
+            }
+          }
+        }
+      }
+      if (matchedLearned) continue;
     }
 
     // Show floating on-page toast notification
@@ -558,6 +760,9 @@ Guidelines:
       }
     }, 4500);
   }
+
+  // Initialize Adaptive Form Learning
+  setupAdaptiveLearning();
 
   // Listen for messages from popup or background service worker
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

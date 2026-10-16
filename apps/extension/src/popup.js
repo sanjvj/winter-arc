@@ -163,4 +163,72 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  // 4. Render Learned Fields Bank
+  function renderLearnedFields() {
+    const listEl = document.getElementById('learned-list');
+    const emptyEl = document.getElementById('learned-empty');
+    const countEl = document.getElementById('learned-count');
+    if (!listEl) return;
+
+    if (chrome && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['winterArcLearnedFields'], (result) => {
+        const learned = result.winterArcLearnedFields || {};
+        const entries = Object.entries(learned);
+        if (countEl) countEl.textContent = entries.length.toString();
+
+        if (entries.length === 0) {
+          if (emptyEl) emptyEl.style.display = 'block';
+          listEl.innerHTML = '';
+          return;
+        }
+
+        if (emptyEl) emptyEl.style.display = 'none';
+        listEl.innerHTML = '';
+
+        for (const [key, item] of entries) {
+          const row = document.createElement('div');
+          row.style.display = 'flex';
+          row.style.alignItems = 'center';
+          row.style.justifyContent = 'space-between';
+          row.style.background = '#1A1D28';
+          row.style.padding = '6px 8px';
+          row.style.borderRadius = '6px';
+          row.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+
+          row.innerHTML = `
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 280px;">
+              <span style="color: #7DD3FC; font-weight: 500;">${item.label || key}:</span>
+              <span style="color: #FFFFFF; margin-left: 4px;">"${item.value}"</span>
+            </div>
+            <button data-key="${key}" style="background: none; border: none; color: #71717A; cursor: pointer; padding: 2px 4px; font-size: 12px;" title="Forget field">✕</button>
+          `;
+
+          const deleteBtn = row.querySelector('button');
+          deleteBtn.addEventListener('click', (e) => {
+            const targetKey = e.currentTarget.getAttribute('data-key');
+            delete learned[targetKey];
+            chrome.storage.local.set({ winterArcLearnedFields: learned }, () => {
+              renderLearnedFields();
+            });
+          });
+
+          listEl.appendChild(row);
+        }
+      });
+    }
+  }
+
+  // Initial render of learned fields
+  renderLearnedFields();
+
+  // Listen for storage changes so learned fields update live in popup
+  if (chrome && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && changes.winterArcLearnedFields) {
+        renderLearnedFields();
+      }
+    });
+  }
 });
+

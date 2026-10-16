@@ -142,7 +142,7 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
           }
           const { salaryLPA, salaryEstimated } = parseSalaryLPA(salaryRaw);
           const id = `lever-${src.name.toLowerCase()}-${item.id}`;
-          collectedJobs.push({
+          const leverJob: Job = {
             id,
             title: item.text,
             company: src.name,
@@ -154,10 +154,11 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
             closed: false,
             tags,
             experienceMinYears: expYears,
-            salaryRaw,
-            salaryLPA,
             salaryEstimated,
-          });
+            ...(salaryRaw ? { salaryRaw } : {}),
+            ...(salaryLPA !== undefined ? { salaryLPA } : {}),
+          };
+          collectedJobs.push(leverJob);
         }
       }
     } catch (err) {
@@ -203,18 +204,22 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
     // Preserve existing user interactions (e.g. 'saved' or 'applied')
     const finalStatus = existingStatus || 'new';
 
+    // Strip any keys with undefined values before calling Firestore batch.set
+    const cleanJob: Record<string, unknown> = {
+      status: finalStatus,
+      updatedAt: serverTimestamp(),
+    };
+    for (const [key, val] of Object.entries(job)) {
+      if (val !== undefined) {
+        cleanJob[key] = val;
+      }
+    }
+
     const docRef = doc(jobsCol, job.id);
-    batch.set(
-      docRef,
-      {
-        ...job,
-        status: finalStatus,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true },
-    );
+    batch.set(docRef, cleanJob, { merge: true });
     savedCount++;
   }
+
 
   if (savedCount > 0 || existingStatusMap.size > 0) {
     await batch.commit();
