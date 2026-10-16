@@ -78,9 +78,25 @@ This document tracks the phased implementation across Prompts 1 through 9.
 - [ ] **Prompt 7: Job Pipeline, Applications Kanban & Prep Trackers**
   - [ ] Build Job Feed view (`/jobs`) with filters, relevance ranking, and quick-save/dismiss actions.
   - [ ] Build Applications Kanban pipeline (`/pipeline`) using `@dnd-kit` across statuses (`saved`, `applied`, `oa`, `interview`, `offer`, etc.).
-  - [ ] Build DSA problem tracker view (`/dsa`) with pattern tags and solution insight logging.
-  - [ ] Build Spaced Repetition queue view (`/revision`) with pass/fail review actions.
-  - [ ] Build Mistakes journal (`/mistakes`), Mock interviews tracker (`/mocks`), Roadmap syllabus (`/roadmap`), and Weekly reviews (`/review`).
+  - [x] **The Learning Core (DSA Tracker, Spaced Revision, Cheat Sheets & Mistakes Notebook):**
+    - [x] Pure Spec 7.4 revision engine & Spec 7.5 pattern coverage functions in `packages/shared` with 23 Vitest tests (clean solve fast-track, fail resets to Step 0 due tomorrow, double-review idempotency, overdue > interval 1-step advancement, 14-day forecast).
+    - [x] DSA problem tracker (`/dsa`):
+      - [x] Keyboard-first Add Problem drawer (shortcut `n`, <kbd>Esc</kbd> to close, <kbd>Cmd</kbd>/<kbd>Ctrl</kbd>+<kbd>Enter</kbd> to save, URL auto-platform & title extraction, 200-char insight guard, sub-20s logging).
+      - [x] Problem table with multi-criteria filtering (pattern, difficulty, outcome, status), sorting, and pagination.
+      - [x] Problem detail view with full revision history timeline.
+      - [x] Pattern coverage section with 18 progress bars and weakest 3 patterns callout.
+      - [x] Pattern cheat sheets tab with 18 standard patterns, template pre-fill, zero-dependency Markdown preview, and debounced Firestore autosave.
+      - [x] CSV pipeline: Notion-format import with column mapping, dry-run preview, duplicate URL detection, error report, and CSV export.
+    - [x] Active Recall Revision queue (`/revision`):
+      - [x] Queue overview with KPIs (Due Today, Overdue, Mastered, Total Queue) and 14-day visual forecast bar chart.
+      - [x] Active recall review mode: problem metadata with timer; key insight and anti-pattern concealed until <kbd>Space</kbd> reveal; <kbd>p</kbd> to Pass, <kbd>f</kbd> to Fail; instant interval toast feedback and session summary.
+    - [x] Mistakes journal (`/mistakes`):
+      - [x] One-line quick-add bar with shortcut `m`.
+      - [x] Weekly grouped list with batch "Mark Week Reviewed" action appending to `reviewedWeeks`.
+      - [x] Weekly review mode walking through the last 7 days of mistakes.
+      - [x] "Most Repeated" view with pattern breakdown and automated semantic anti-pattern clustering.
+    - [x] Dynamic dashboard integration: `dueRevisionsAtStart` captured in daily log; `RevisionsDueCard`, `PatternCoverageCard`, and `MistakeCard` live-wired to Firestore.
+  - [ ] Mock interviews tracker (`/mocks`), Roadmap syllabus (`/roadmap`), and Weekly reviews (`/review`).
 
 - [ ] **Prompt 8: Autofill Chrome Extension (Manifest V3)**
   - [ ] Initialize `/apps/extension` with Vite, TypeScript, and Chrome Manifest V3.

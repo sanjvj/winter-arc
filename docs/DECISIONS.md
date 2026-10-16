@@ -56,6 +56,19 @@ This log records every non-obvious architectural, design, and dependency decisio
 - **Rationale & Alternatives Considered:** Treating an unclosed active day as an instant streak failure destroys habit momentum and contradicts Spec 7.3. The `atRisk` flag allows the UI to surface motivational warning banners after 18:00 IST while keeping the streak technically intact until midnight.
 - **Impact & Consequences:** Dashboard hero, streak card, and in-app warning banners dynamically reflect `atRisk` state.
 
+### ADR-006: Spaced Repetition Engine & Zero-Dependency Active Recall Architecture
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** Spec 7.4 mandates a 5-step spaced repetition schedule (`[1, 3, 7, 14, 30]` days), fast-tracking clean solves $\le 25\text{ mins}$ to Step 2 (+7d), resetting failures to Step 0 due tomorrow, strictly ignoring same-day repeat reviews (idempotency), and advancing overdue items by exactly one step only regardless of overdue duration. Furthermore, pattern cheat sheets require markdown preview while adhering strictly to Rule 6 (zero unapproved external dependencies).
+- **Decision:**
+  1. Implemented `initProblemRevision`, `advanceRevision`, `getRevisionQueue`, `getRevisionForecast`, and `calculatePatternCoverage` as pure functions in `packages/shared` covered by 23 dedicated Vitest unit tests.
+  2. Built a clean, zero-dependency Markdown parser and renderer inside `PatternCheatSheets` to avoid introducing external dependencies.
+  3. Built an active recall mask in `ActiveRecallModal` concealing problem insights and notes until explicit <kbd>Space</kbd> revelation, with keyboard-driven <kbd>p</kbd> (Pass) and <kbd>f</kbd> (Fail) workflows.
+  4. Implemented RFC 4180 compliant CSV parser and exporter (`packages/shared/src/csv.ts`) with flexible Notion column aliasing and dry-run URL duplicate detection.
+- **Rationale & Alternatives Considered:** Hand-crafting the lightweight markdown preview and CSV parser prevented adding heavy external dependencies (`react-markdown`, `papaparse`) while guaranteeing 100% type safety and performance.
+- **Impact & Consequences:** Problems logged in `/dsa` immediately schedule spaced reviews, feed the 14-day projection in `/revision`, and dynamically update dashboard Bento cards (`RevisionsDueCard`, `PatternCoverageCard`, `MistakeCard`).
+
 ---
 
 ### ADR Template (For Future Entries)
