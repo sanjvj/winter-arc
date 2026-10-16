@@ -69,6 +69,25 @@ This log records every non-obvious architectural, design, and dependency decisio
 - **Rationale & Alternatives Considered:** Hand-crafting the lightweight markdown preview and CSV parser prevented adding heavy external dependencies (`react-markdown`, `papaparse`) while guaranteeing 100% type safety and performance.
 - **Impact & Consequences:** Problems logged in `/dsa` immediately schedule spaced reviews, feed the 14-day projection in `/revision`, and dynamically update dashboard Bento cards (`RevisionsDueCard`, `PatternCoverageCard`, `MistakeCard`).
 
+### ADR-007: Job Search Tracking Surface Architecture (Pipeline Kanban, Mocks, Roadmap & Weekly Review)
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** Implementing the complete tracking surface required:
+  1. An 8-stage Kanban board with accessible drag-and-drop (`@dnd-kit`).
+  2. Automatic transition invariants: moving an application to `applied` sets `appliedDate` to today if unset, and every stage change appends to `statusHistory`.
+  3. Feedback loop linking mock interview weaknesses/action items directly into roadmap milestones with one click.
+  4. Weekly review engine with objective scorecard, best/worst day identification, deterministic fact-only "Honest Read" rule engine, and 4-week month rollups.
+- **Decision:**
+  1. Installed approved `@dnd-kit/core`, `@dnd-kit/sortable`, and `@dnd-kit/utilities` in `apps/web` with 5px pointer activation distance allowing click-to-edit without triggering drags.
+  2. Implemented `calculatePipelineFunnel` and `getOverdueFollowUps` in `packages/shared/src/funnel.ts`.
+  3. Implemented `calculateWeeklySummary`, `generateHonestRead`, and `calculateMonthRollup` in `packages/shared/src/weekly-review.ts`. Candidate days for best/worst day evaluation are restricted to days with recorded activity so future unlogged days are not falsely branded as the worst day.
+  4. Designed the "Honest Read" engine to evaluate strictly verifiable facts (e.g., application targets vs actuals, mock interview completion, streak floor integrity, sleep and startup hours), completely avoiding speculative psychological statements.
+  5. Implemented one-click action to turn any mock interview action item into an active week goal in `roadmap/main`.
+  6. Added an overdue follow-up count badge next to "Pipeline Kanban" in `sidebar.tsx` and connected live metrics to dashboard bento cards.
+- **Rationale & Alternatives Considered:** Pure calculation logic and honest-read rule evaluation reside exclusively in `packages/shared` with 100% test coverage, maintaining clean separation between domain logic and presentation.
+- **Impact & Consequences:** The complete tracking loop—applications, mock defense, syllabus milestones, and weekly retrospectives—is fully interactive, strongly typed, and persists to Firestore.
+
 ---
 
 ### ADR Template (For Future Entries)

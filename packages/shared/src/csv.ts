@@ -1,4 +1,4 @@
-import { Problem, ProblemSchema } from './schemas';
+import { Problem, ProblemSchema, Application } from './schemas';
 import { initProblemRevision } from './revision';
 import { parseProblemUrl } from './url-parser';
 import { todayIST } from './time';
@@ -308,6 +308,48 @@ export function exportProblemsCsv(problems: Problem[]): string {
       escapeCsvCell(p.revision.step),
       escapeCsvCell(p.revision.nextDue),
       escapeCsvCell(p.revision.mastered),
+    ];
+    lines.push(row.join(','));
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * Serializes applications array to an RFC-4180 CSV string.
+ */
+export function exportApplicationsCsv(applications: Application[]): string {
+  const headers = [
+    'company',
+    'role',
+    'url',
+    'source',
+    'status',
+    'appliedDate',
+    'referral',
+    'referrerName',
+    'salaryLPA',
+    'location',
+    'followUpDate',
+    'notes',
+  ];
+
+  const lines = [headers.join(',')];
+
+  for (const a of applications) {
+    const row = [
+      escapeCsvCell(a.company),
+      escapeCsvCell(a.role),
+      escapeCsvCell(a.url),
+      escapeCsvCell(a.source),
+      escapeCsvCell(a.status),
+      escapeCsvCell(a.appliedDate || ''),
+      escapeCsvCell(a.referral ? 'true' : 'false'),
+      escapeCsvCell(a.referrerName || ''),
+      escapeCsvCell(a.salaryLPA !== undefined ? a.salaryLPA : ''),
+      escapeCsvCell(a.location || ''),
+      escapeCsvCell(a.followUpDate || ''),
+      escapeCsvCell(a.notes || ''),
     ];
     lines.push(row.join(','));
   }

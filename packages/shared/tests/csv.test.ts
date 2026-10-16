@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseProblemsCsv, exportProblemsCsv, Problem } from '../src';
+import {
+  parseProblemsCsv,
+  exportProblemsCsv,
+  exportApplicationsCsv,
+  Problem,
+  Application,
+} from '../src';
 
 describe('CSV Parsing, Dry-Run Validation, and Export', () => {
   const sampleCsv = `Title,URL,Pattern,Difficulty,Date,Outcome,TimeTaken,Insight
@@ -93,5 +99,31 @@ describe('CSV Parsing, Dry-Run Validation, and Export', () => {
     expect(csvOutput).toContain('Two Sum');
     expect(csvOutput).toContain('"Hash map complement, with a comma"');
     expect(csvOutput).toContain('2026-10-10');
+  });
+
+  it('exports applications to CSV matching format', () => {
+    const apps: Application[] = [
+      {
+        company: 'Google',
+        role: 'Software Engineer',
+        url: 'https://careers.google.com',
+        source: 'referral',
+        status: 'applied',
+        appliedDate: '2026-10-12',
+        referral: true,
+        referrerName: 'Alice',
+        salaryLPA: 35,
+        location: 'Bengaluru',
+        followUpDate: '2026-10-19',
+        notes: 'Referred by college senior, team match pending',
+        statusHistory: [],
+      },
+    ];
+
+    const csvOutput = exportApplicationsCsv(apps);
+    expect(csvOutput).toContain('Google,Software Engineer');
+    expect(csvOutput).toContain('"Referred by college senior, team match pending"');
+    expect(csvOutput).toContain('35');
+    expect(csvOutput).toContain('Alice');
   });
 });

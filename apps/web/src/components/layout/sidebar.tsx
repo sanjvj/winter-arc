@@ -11,6 +11,9 @@ import {
   SettingsSchema,
   DailyLog,
   DailyLogSchema,
+  Application,
+  ApplicationSchema,
+  getOverdueFollowUps,
   todayIST,
   getPlanDayNumberIST,
   calculateStreak,
@@ -54,6 +57,7 @@ export function Sidebar() {
 
   const { data: remoteSettings } = useDoc<Settings>('settings', 'main', SettingsSchema);
   const { data: allLogs } = useCollection<DailyLog>('dailyLogs', DailyLogSchema);
+  const { data: allApplications } = useCollection<Application>('applications', ApplicationSchema);
 
   const today = todayIST();
   const planDay = remoteSettings?.planStartDate
@@ -61,6 +65,8 @@ export function Sidebar() {
     : 1;
   const planLength = remoteSettings?.planLengthDays || 90;
   const streak = calculateStreak(allLogs || [], today);
+  const overdueFollowUps = getOverdueFollowUps(allApplications || [], today);
+  const overdueCount = overdueFollowUps.length;
 
   return (
     <aside className="hidden md:flex h-screen w-64 flex-col justify-between border-r border-border-token bg-surface p-4 fixed left-0 top-0 z-30">
@@ -126,6 +132,11 @@ export function Sidebar() {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span>{item.label}</span>
+                {item.href === '/pipeline' && overdueCount > 0 && (
+                  <span className="ml-auto rounded-full bg-status-danger/20 border border-status-danger/40 px-1.5 py-0.5 text-[10px] font-mono text-status-danger font-bold">
+                    {overdueCount}
+                  </span>
+                )}
               </Link>
             );
           })}

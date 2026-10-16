@@ -77,7 +77,36 @@ This document tracks the phased implementation across Prompts 1 through 9.
 
 - [ ] **Prompt 7: Job Pipeline, Applications Kanban & Prep Trackers**
   - [ ] Build Job Feed view (`/jobs`) with filters, relevance ranking, and quick-save/dismiss actions.
-  - [ ] Build Applications Kanban pipeline (`/pipeline`) using `@dnd-kit` across statuses (`saved`, `applied`, `oa`, `interview`, `offer`, etc.).
+  - [x] **Applications Pipeline Kanban (`/pipeline`):**
+    - [x] 8-column Kanban board (`saved`, `applied`, `oa`, `interview`, `offer`, `rejected`, `ghosted`, `withdrawn`) with `@dnd-kit` drag-and-drop and keyboard accessibility.
+    - [x] Moving to `applied` auto-sets `appliedDate` to today (`todayIST()`) if unset.
+    - [x] Every status transition appends `{ status, date }` to `statusHistory`.
+    - [x] Top "Follow-ups due" notification strip with quick complete and reschedule actions (+3d, +7d).
+    - [x] Add/Edit drawer with all Spec 6 fields, salary, location, follow-up date, and history timeline.
+    - [x] Quick Add drawer (shortcut <kbd>a</kbd>) with duplicate company + role warning alert.
+    - [x] Table view toggle, search, status/source/referral filters, and RFC-4180 CSV export.
+    - [x] Funnel stats bar: total applied, OA rate %, interview rate %, offer rate %, average days to first response, referral vs direct conversion.
+  - [x] **Mock Interviews Tracker (`/mocks`):**
+    - [x] Log form with chip inputs for strengths, weaknesses, action items, and problems tackled.
+    - [x] Filterable list by interview type (`dsa`, `lld`, `system-design`, `behavioral`, `full-loop`, `hr`).
+    - [x] Analytics charts: 1-5 score trend over time, weekly volume vs `mocksPerWeek` target, ranked frequent weakness tags.
+    - [x] One-click action turning any action item into an active week milestone goal in `roadmap/main`.
+  - [x] **Syllabus Roadmap (`/roadmap`):**
+    - [x] 12-week timeline accordion with current week expanded, goal checkboxes, week & overall progress bars.
+    - [x] Topics board grouped by discipline (`CS core`, `Full-stack`, `LLD designs`, `System design`, `Behavioral`) with `todo`/`doing`/`done` status toggles and per-group progress.
+    - [x] Add/edit/remove milestone goals and syllabus topics.
+  - [x] **Weekly Retrospective & Honest Read (`/review`):**
+    - [x] Week picker with previous/next navigation for any Monday-Sunday week.
+    - [x] 7-day metric scorecard table (problems, revisions, applications, mocks, startup hours, gym, sleep, energy, floor met) with daily mini charts.
+    - [x] Objective Best Day and Worst Day identification with concrete metrics.
+    - [x] Mistakes notebook review with "Mark Reviewed This Week" action.
+    - [x] Roadmap goals planned vs completed checklist.
+    - [x] Three reflection fields (`whatWorked`, `whatToChange`, `nextFocus`) saved to `weeklyReviews/{weekStart}`.
+    - [x] Rule-based "Honest Read" engine flagging verifiable facts with zero psychological speculation.
+    - [x] Month view tab rolling up Weeks 1-4, 5-8, and 9-12.
+  - [x] **Dashboard & Shell Integration:**
+    - [x] Overdue follow-ups count badge next to "Pipeline Kanban" in `sidebar.tsx`.
+    - [x] Live Firestore data wiring for `PipelineFunnelCard`, `WeekGlanceCard`, `MocksCard`, `RoadmapCard`, and `HoursCard`.
   - [x] **The Learning Core (DSA Tracker, Spaced Revision, Cheat Sheets & Mistakes Notebook):**
     - [x] Pure Spec 7.4 revision engine & Spec 7.5 pattern coverage functions in `packages/shared` with 23 Vitest tests (clean solve fast-track, fail resets to Step 0 due tomorrow, double-review idempotency, overdue > interval 1-step advancement, 14-day forecast).
     - [x] DSA problem tracker (`/dsa`):
@@ -96,7 +125,6 @@ This document tracks the phased implementation across Prompts 1 through 9.
       - [x] Weekly review mode walking through the last 7 days of mistakes.
       - [x] "Most Repeated" view with pattern breakdown and automated semantic anti-pattern clustering.
     - [x] Dynamic dashboard integration: `dueRevisionsAtStart` captured in daily log; `RevisionsDueCard`, `PatternCoverageCard`, and `MistakeCard` live-wired to Firestore.
-  - [ ] Mock interviews tracker (`/mocks`), Roadmap syllabus (`/roadmap`), and Weekly reviews (`/review`).
 
 - [ ] **Prompt 8: Autofill Chrome Extension (Manifest V3)**
   - [ ] Initialize `/apps/extension` with Vite, TypeScript, and Chrome Manifest V3.

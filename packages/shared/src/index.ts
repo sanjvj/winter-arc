@@ -8,3 +8,5 @@ export * from './revision';
 export * from './coverage';
 export * from './url-parser';
 export * from './csv';
+export * from './funnel';
+export * from './weekly-review';
