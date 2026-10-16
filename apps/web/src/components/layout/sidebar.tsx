@@ -5,6 +5,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/auth-context';
+import { useDoc, useCollection } from '@/lib/data';
+import {
+  Settings,
+  SettingsSchema,
+  DailyLog,
+  DailyLogSchema,
+  todayIST,
+  getPlanDayNumberIST,
+  calculateStreak,
+} from '@winter-arc/shared';
 import {
   LayoutDashboard,
   Clock,
@@ -17,7 +27,7 @@ import {
   Map,
   ClipboardCheck,
   Chrome,
-  Settings,
+  Settings as SettingsIcon,
   Flame,
   LogOut,
   Calendar,
@@ -35,12 +45,22 @@ export const navigationItems = [
   { href: '/roadmap', label: '90-Day Roadmap', icon: Map },
   { href: '/review', label: 'Weekly Review', icon: ClipboardCheck },
   { href: '/extension', label: 'Autofill Ext', icon: Chrome },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/settings', label: 'Settings', icon: SettingsIcon },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
   const { user, signOut } = useAuth();
+
+  const { data: remoteSettings } = useDoc<Settings>('settings', 'main', SettingsSchema);
+  const { data: allLogs } = useCollection<DailyLog>('dailyLogs', DailyLogSchema);
+
+  const today = todayIST();
+  const planDay = remoteSettings?.planStartDate
+    ? getPlanDayNumberIST(remoteSettings.planStartDate, today)
+    : 1;
+  const planLength = remoteSettings?.planLengthDays || 90;
+  const streak = calculateStreak(allLogs || [], today);
 
   return (
     <aside className="hidden md:flex h-screen w-64 flex-col justify-between border-r border-border-token bg-surface p-4 fixed left-0 top-0 z-30">
@@ -60,13 +80,31 @@ export function Sidebar() {
 
         {/* Status Chips */}
         <div className="grid grid-cols-2 gap-2">
-          <div className="flex items-center gap-1.5 rounded-xl border border-border-token bg-surface-2 px-2.5 py-1.5">
+          <div
+            className="flex items-center gap-1.5 rounded-xl border border-border-token bg-surface-2 px-2.5 py-1.5"
+            title={`Plan Day ${planDay} of ${planLength}`}
+          >
             <Calendar className="h-3.5 w-3.5 text-accent-ice" />
-            <span className="font-mono text-[11px] font-semibold text-text">Day 1 of 90</span>
+            <span className="font-mono text-[11px] font-semibold text-text truncate">
+              Day {planDay} of {planLength}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 rounded-xl border border-border-token bg-surface-2 px-2.5 py-1.5">
-            <Flame className="h-3.5 w-3.5 text-status-warn animate-pulse" />
-            <span className="font-mono text-[11px] font-semibold text-text">0d Streak</span>
+          <div
+            className="flex items-center gap-1.5 rounded-xl border border-border-token bg-surface-2 px-2.5 py-1.5"
+            title={streak.atRisk ? 'Floor not yet completed today' : 'Streak active'}
+          >
+            <Flame
+              className={`h-3.5 w-3.5 ${
+                streak.atRisk
+                  ? 'text-status-warn animate-pulse'
+                  : streak.currentStreak > 0
+                    ? 'text-accent-ice'
+                    : 'text-muted'
+              }`}
+            />
+            <span className="font-mono text-[11px] font-semibold text-text">
+              {streak.currentStreak}d Streak
+            </span>
           </div>
         </div>
 

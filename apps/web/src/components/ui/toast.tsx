@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type ToastType = 'success' | 'error' | 'info';
+export type ToastType = 'success' | 'error' | 'info' | 'warn';
 
 export interface ToastMessage {
   id: string;
@@ -18,6 +18,7 @@ interface ToastContextType {
   success: (title: string, message?: string) => void;
   error: (title: string, message?: string) => void;
   info: (title: string, message?: string) => void;
+  warn: (title: string, message?: string) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -28,6 +29,7 @@ export const toast = {
   success: (title: string, message?: string) => globalToastHandler?.('success', title, message),
   error: (title: string, message?: string) => globalToastHandler?.('error', title, message),
   info: (title: string, message?: string) => globalToastHandler?.('info', title, message),
+  warn: (title: string, message?: string) => globalToastHandler?.('warn', title, message),
 };
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
@@ -62,6 +64,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     success: (title: string, message?: string) => addToast('success', title, message),
     error: (title: string, message?: string) => addToast('error', title, message),
     info: (title: string, message?: string) => addToast('info', title, message),
+    warn: (title: string, message?: string) => addToast('warn', title, message),
   };
 
   return (
@@ -78,6 +81,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 t.type === 'success' && 'border-status-success/30',
                 t.type === 'error' && 'border-status-danger/30',
                 t.type === 'info' && 'border-accent-ice/30',
+                t.type === 'warn' && 'border-status-warn/30',
               )}
             >
               {t.type === 'success' && (
@@ -85,6 +89,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               )}
               {t.type === 'error' && (
                 <AlertCircle className="h-5 w-5 text-status-danger shrink-0 mt-0.5" />
+              )}
+              {t.type === 'warn' && (
+                <AlertCircle className="h-5 w-5 text-status-warn shrink-0 mt-0.5" />
               )}
               {t.type === 'info' && <Info className="h-5 w-5 text-accent-ice shrink-0 mt-0.5" />}
 

@@ -44,15 +44,28 @@ This document tracks the phased implementation across Prompts 1 through 9.
   - [x] Integrate Firebase Auth (Google Sign-In) with `OWNER_EMAIL` restriction and "Access Denied" guard.
   - [x] Define Firestore security rules (`request.auth.token.email == OWNER_EMAIL`) and rule substitution build script.
 
-- [ ] **Prompt 5: Daily Logging (<60s Entry) & Dashboard Bento Grid**
-  - [ ] Build rapid daily logging route (`/log`) optimized for completion in under 60 seconds.
-  - [ ] Implement schedule block checklist, energy rating, top-3 priorities, and habit tracking.
-  - [ ] Build Bento Dashboard (`/`) assembling operational cards:
-    - [ ] Streak card with animated flame and "at-risk" warning indicator.
-    - [ ] Daily floor status widget with live progress towards minimum floor.
-    - [ ] Due revisions card sorted oldest-first.
-    - [ ] Rapid problem solver and quick log action launchers.
-  - [ ] Implement optimistic updates with toast notifications on mutation failures.
+- [x] **Prompt 5: Daily Logging (<60s Entry) & Dashboard Bento Grid**
+  - [x] Pure domain calculations in `packages/shared`:
+    - [x] Spec 7.1 Auto-derived counters (`calculateDailyCounters`) with override support.
+    - [x] Spec 7.2 Floor completion check (`evaluateFloorMet`) with `dueRevisionsAtStart == 0` boundary handling.
+    - [x] Spec 7.3 Streak engine (`calculateStreak`) with at-risk states, gap detection, month/year boundaries, and DST-free IST.
+    - [x] Sleep duration calculation (`calculateSleepHours`) with cross-midnight support.
+    - [x] Comprehensive Vitest tests in `packages/shared` (53 passing unit tests).
+  - [x] Rapid daily logging route (`/log`):
+    - [x] 7-day quick date switcher (today + prior 6 days) with status pills.
+    - [x] Top metric strip with 4 counters, floor targets, tap-to-override modals, and jump links.
+    - [x] Sleep/wake times with auto-computed sleep hours, startup hour stepper, gym toggle, 1-5 energy rating, win/loss inputs, and top-3 priorities.
+    - [x] Schedule blocks checklist from settings with live ticking.
+    - [x] Debounced autosave (800ms) with save timestamp indicator.
+    - [x] "Close the day" button with celebratory or missing-requirements modal and updated streak.
+    - [x] Responsive layout optimized for 375px phone with large touch targets (<60s completion).
+  - [x] Dashboard (`/`) Bento Layout:
+    - [x] Desktop 12-column grid and 6-column tablet reflow with exact card sizes (`H`, `M`, `L`, `XL`, `W`).
+    - [x] Single-column mobile order with priority: Hero, Floor rings, Checklist, Revisions due, Job feed, Streak, Hours, Week, Pipeline, Pattern coverage, Heatmap, rest.
+    - [x] All 16 cards implemented with loading skeletons, graceful empty states with call-to-actions, and error boundaries.
+  - [x] App shell integration:
+    - [x] Real-time Day X of 90 and Streak chips in desktop sidebar.
+    - [x] In-app warning banners: after 18:00 IST if floor unmet ("Streak at risk") and after 21:00 IST if log open.
 
 - [ ] **Prompt 6: Automated Job Scraper & Firestore Feed Ingestion**
   - [ ] Set up `/apps/scraper` with Node 20, TypeScript, `undici`, `cheerio`, and `firebase-admin`.

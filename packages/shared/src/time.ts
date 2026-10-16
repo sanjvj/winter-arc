@@ -72,3 +72,40 @@ export function getPlanDayNumberIST(
 export function nowInISTDisplay(referenceDate: Date = new Date()): string {
   return formatInTimeZone(referenceDate, TIMEZONE_IST, 'EEEE, d MMMM yyyy');
 }
+
+/**
+ * Calculates sleep hours given sleep time and wake time (HH:mm).
+ * Handles cross-midnight sleep (e.g. 22:45 to 06:30 -> 7.75 hours).
+ * Returns duration in hours rounded to 2 decimal places.
+ */
+export function calculateSleepHours(sleepTime: string, wakeTime: string): number {
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(sleepTime) || !/^([01]\d|2[0-3]):[0-5]\d$/.test(wakeTime)) {
+    return 0;
+  }
+  const [sH, sM] = sleepTime.split(':').map((v) => parseInt(v, 10));
+  const [wH, wM] = wakeTime.split(':').map((v) => parseInt(v, 10));
+  const sTotal = (sH ?? 0) * 60 + (sM ?? 0);
+  const wTotal = (wH ?? 0) * 60 + (wM ?? 0);
+
+  let diffMinutes = wTotal - sTotal;
+  if (diffMinutes < 0) {
+    // Crosses midnight
+    diffMinutes += 24 * 60;
+  }
+  return Math.round((diffMinutes / 60) * 100) / 100;
+}
+
+/**
+ * Returns the current time formatted as HH:mm in IST.
+ */
+export function nowTimeIST(referenceDate: Date = new Date()): string {
+  return formatInTimeZone(referenceDate, TIMEZONE_IST, 'HH:mm');
+}
+
+/**
+ * Returns the current hour (0-23) in IST.
+ */
+export function nowHourIST(referenceDate: Date = new Date()): number {
+  const hourStr = formatInTimeZone(referenceDate, TIMEZONE_IST, 'HH');
+  return parseInt(hourStr, 10);
+}

@@ -6,6 +6,8 @@ import { Sidebar } from './sidebar';
 import { Topbar } from './topbar';
 import { MobileNav } from './mobile-nav';
 
+import { InAppBanners } from './in-app-banners';
+
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
@@ -21,7 +23,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex flex-1 flex-col md:pl-64">
         <Topbar />
-        <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 pb-24 md:pb-8">
+          <InAppBanners />
+          {children}
+        </main>
       </div>
       <MobileNav />
     </div>

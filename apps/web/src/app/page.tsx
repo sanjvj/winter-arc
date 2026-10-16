@@ -1,127 +1,291 @@
-import React from 'react';
-import { BentoGrid, BentoCard } from '@/components/bento';
-import { Flame, Clock, Target, Code2, Briefcase, RefreshCw, Sparkles } from 'lucide-react';
-import Link from 'next/link';
+'use client';
+
+import React, { useMemo } from 'react';
+import { useAuth } from '@/contexts/auth-context';
+import { useDoc, useCollection, setDocument } from '@/lib/data';
+import {
+  Settings,
+  SettingsSchema,
+  DailyLog,
+  DailyLogSchema,
+  Problem,
+  ProblemSchema,
+  Application,
+  ApplicationSchema,
+  Mock,
+  MockSchema,
+  Job,
+  JobSchema,
+  Roadmap,
+  RoadmapSchema,
+  Mistake,
+  MistakeSchema,
+  ScraperRun,
+  ScraperRunSchema,
+  createDefaultSettings,
+  todayIST,
+  nowHourIST,
+  getPlanDayNumberIST,
+  calculateDailyCounters,
+  evaluateFloorMet,
+  calculateStreak,
+  weekStartMondayIST,
+} from '@winter-arc/shared';
+import { BentoGrid } from '@/components/bento';
+
+import { HeroCard } from '@/components/dashboard/hero-card';
+import { StreakCard } from '@/components/dashboard/streak-card';
+import { FloorRingsCard } from '@/components/dashboard/floor-rings-card';
+import { HoursCard } from '@/components/dashboard/hours-card';
+import { RevisionsDueCard } from '@/components/dashboard/revisions-due-card';
+import { ChecklistCard } from '@/components/dashboard/checklist-card';
+import { HeatmapCard } from '@/components/dashboard/heatmap-card';
+import { WeekGlanceCard } from '@/components/dashboard/week-glance-card';
+import { MocksCard } from '@/components/dashboard/mocks-card';
+import { JobPreviewCard } from '@/components/dashboard/job-preview-card';
+import { PatternCoverageCard } from '@/components/dashboard/pattern-coverage-card';
+import { PipelineFunnelCard } from '@/components/dashboard/pipeline-funnel-card';
+import { RoadmapCard } from '@/components/dashboard/roadmap-card';
+import { MistakeCard } from '@/components/dashboard/mistake-card';
+import { TrendsCard } from '@/components/dashboard/trends-card';
+import { ScraperHealthCard } from '@/components/dashboard/scraper-health-card';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
+  const today = todayIST();
+  const currentHour = nowHourIST();
+
+  // 1. Live Data Subscriptions
+  const { data: remoteSettings, loading: loadingSettings } = useDoc<Settings>(
+    'settings',
+    'main',
+    SettingsSchema,
+  );
+  const settings = remoteSettings || createDefaultSettings(today);
+
+  const { data: allLogs, loading: loadingLogs } = useCollection<DailyLog>(
+    'dailyLogs',
+    DailyLogSchema,
+  );
+  const { data: todayLog, loading: loadingTodayLog } = useDoc<DailyLog>(
+    'dailyLogs',
+    today,
+    DailyLogSchema,
+  );
+
+  const { data: allProblems, loading: loadingProblems } = useCollection<Problem>(
+    'problems',
+    ProblemSchema,
+  );
+  const { data: allApplications, loading: loadingApplications } = useCollection<Application>(
+    'applications',
+    ApplicationSchema,
+  );
+  const { data: allMocks, loading: loadingMocks } = useCollection<Mock>('mocks', MockSchema);
+  const { data: allJobs, loading: loadingJobs } = useCollection<Job>('jobs', JobSchema);
+  const { data: roadmap, loading: loadingRoadmap } = useDoc<Roadmap>(
+    'roadmap',
+    'main',
+    RoadmapSchema,
+  );
+  const { data: allMistakes, loading: loadingMistakes } = useCollection<Mistake>(
+    'mistakes',
+    MistakeSchema,
+  );
+  const { data: allRuns, loading: loadingRuns } = useCollection<ScraperRun>(
+    'scraperRuns',
+    ScraperRunSchema,
+  );
+
+  // Map of date -> DailyLog
+  const logsByDate = useMemo(() => {
+    const map = new Map<string, DailyLog>();
+    if (allLogs) {
+      for (const log of allLogs) {
+        map.set(log.date, log);
+      }
+    }
+    return map;
+  }, [allLogs]);
+
+  // Streak Calculation
+  const streakResult = useMemo(() => {
+    return calculateStreak(allLogs || [], today);
+  }, [allLogs, today]);
+
+  // Today's Counters & Floor Evaluation
+  const dailyCounters = useMemo(() => {
+    return calculateDailyCounters(today, {
+      problems: allProblems || [],
+      applications: allApplications || [],
+      mocks: allMocks || [],
+      overrides: todayLog?.overrides,
+    });
+  }, [today, allProblems, allApplications, allMocks, todayLog?.overrides]);
+
+  const floorEvaluation = useMemo(() => {
+    return evaluateFloorMet(
+      dailyCounters,
+      settings.floor,
+      todayLog?.dueRevisionsAtStart || 0,
+      todayLog?.submitted || false,
+    );
+  }, [dailyCounters, settings.floor, todayLog?.dueRevisionsAtStart, todayLog?.submitted]);
+
+  // Revisions Due Count Today
+  const dueRevisionsCount = useMemo(() => {
+    if (!allProblems) return 0;
+    return allProblems.filter(
+      (p) =>
+        p.revision && !p.revision.mastered && p.revision.nextDue && p.revision.nextDue <= today,
+    ).length;
+  }, [allProblems, today]);
+
+  // Weekly Stats (Monday to Sunday)
+  const weekStart = weekStartMondayIST(today);
+  const problemsThisWeek = useMemo(() => {
+    if (!allProblems) return 0;
+    return allProblems.filter((p) => p.solvedAt >= weekStart && p.solvedAt <= today).length;
+  }, [allProblems, weekStart, today]);
+
+  const applicationsThisWeek = useMemo(() => {
+    if (!allApplications) return 0;
+    return allApplications.filter((a) => a.appliedDate >= weekStart && a.appliedDate <= today)
+      .length;
+  }, [allApplications, weekStart, today]);
+
+  const mocksThisWeek = useMemo(() => {
+    if (!allMocks) return 0;
+    return allMocks.filter((m) => m.date >= weekStart && m.date <= today).length;
+  }, [allMocks, weekStart, today]);
+
+  // Plan Day Calculation
+  const planDay = useMemo(() => {
+    return getPlanDayNumberIST(settings.planStartDate, today);
+  }, [settings.planStartDate, today]);
+
+  // Schedule Block Checklist Toggle from Dashboard
+  const handleToggleBlock = async (blockId: string) => {
+    if (!user?.uid) return;
+    const currentChecklist = todayLog?.checklist || {};
+    const nextChecklist = {
+      ...currentChecklist,
+      [blockId]: !currentChecklist[blockId],
+    };
+
+    const updatedLog: DailyLog = todayLog
+      ? { ...todayLog, checklist: nextChecklist }
+      : {
+          date: today,
+          wakeTime: '06:00',
+          sleepTime: '22:45',
+          sleepHours: 7.25,
+          startupHours: 0,
+          gymDone: false,
+          gymHours: 0,
+          energy: 3,
+          win: '',
+          wentWrong: '',
+          tomorrowTop3: ['', '', ''],
+          notes: '',
+          overrides: {},
+          dueRevisionsAtStart: dueRevisionsCount,
+          floorMet: false,
+          submitted: false,
+          submittedAt: null,
+          checklist: nextChecklist,
+        };
+
+    await setDocument(user.uid, 'dailyLogs', today, updatedLog, DailyLogSchema);
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-token pb-5">
-        <div>
-          <span className="font-mono text-xs uppercase tracking-wider text-accent-ice">
-            Mission Control
-          </span>
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-text">
-            Command Center
-          </h1>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href="/log"
-            className="flex items-center gap-2 rounded-xl bg-accent-ice px-4 py-2 text-xs font-semibold text-bg transition-opacity hover:opacity-90"
-          >
-            <Clock className="h-4 w-4" />
-            Log Today (&lt;60s)
-          </Link>
-          <Link
-            href="/design"
-            className="flex items-center gap-1.5 rounded-xl border border-border-token bg-surface px-3 py-2 text-xs font-medium text-muted hover:text-text"
-          >
-            <Sparkles className="h-3.5 w-3.5 text-accent-ice" />
-            Design Showcase
-          </Link>
-        </div>
-      </div>
-
-      {/* Bento Grid Skeleton Preview */}
+    <div className="space-y-4 max-w-[1440px] mx-auto pb-12">
       <BentoGrid>
-        {/* Streak Flame Card (S) */}
-        <BentoCard
-          size="S"
-          icon={<Flame className="h-4 w-4 text-status-warn" />}
-          title="Floor Streak"
-        >
-          <div className="flex items-baseline gap-2">
-            <span className="font-display text-4xl font-bold text-text">0</span>
-            <span className="font-mono text-xs text-muted">Days Active</span>
-          </div>
-          <p className="mt-1 text-[11px] text-muted">Sprint Day 1 • Set pace today</p>
-        </BentoCard>
-
-        {/* Daily Floor Status (M) */}
-        <BentoCard
-          size="M"
-          icon={<Target className="h-4 w-4 text-accent-ice" />}
-          title="Daily Floor Targets"
-        >
-          <div className="space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted">DSA Floor (min 2)</span>
-              <span className="font-mono text-text">0 / 2</span>
-            </div>
-            <div className="h-1.5 w-full rounded-full bg-surface-2">
-              <div className="h-1.5 rounded-full bg-accent-ice w-0" />
-            </div>
-            <p className="text-[11px] text-muted">Floor not met yet: 2 more problems.</p>
-          </div>
-        </BentoCard>
-
-        {/* Startup & Gym (W) */}
-        <BentoCard
-          size="W"
-          icon={<Clock className="h-4 w-4 text-accent-indigo" />}
-          title="Time Allocation (Startup & Fitness)"
-        >
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-[11px] text-muted">Startup Target</p>
-              <p className="font-display text-xl font-bold text-text">0.0 / 4.5 hrs</p>
-            </div>
-            <div>
-              <p className="text-[11px] text-muted">Gym Fitness</p>
-              <p className="font-display text-xl font-bold text-text">0.0 / 2.0 hrs</p>
-            </div>
-          </div>
-        </BentoCard>
-
-        {/* Due Revisions (T) */}
-        <BentoCard
-          size="T"
-          icon={<RefreshCw className="h-4 w-4 text-status-warn" />}
-          title="Due Revisions"
-          emptyMessage="No pending spaced repetitions due today."
-          state="empty"
+        {/* ROW 1: Hero (H 8x1) & Streak (M 4x1) */}
+        <HeroCard
+          ownerName={user?.displayName || 'Sanjay'}
+          planDay={planDay}
+          planLengthDays={settings.planLengthDays}
+          currentHourIST={currentHour}
+          floorEvaluation={floorEvaluation}
+          problemsCount={dailyCounters.problems}
+          revisionsCount={dailyCounters.revisions}
+          applicationsCount={dailyCounters.applications}
+          floorProblems={settings.floor.problems}
+          floorRevisions={todayLog?.dueRevisionsAtStart === 0 ? 0 : settings.floor.revisions}
+          floorApplications={settings.floor.applications}
+          loading={loadingSettings || loadingTodayLog}
         />
 
-        {/* Active Pipeline (L) */}
-        <BentoCard
-          size="L"
-          icon={<Briefcase className="h-4 w-4 text-accent-ice" />}
-          title="Application Pipeline"
-          emptyMessage="Zero active applications. Check fresh scraped roles."
-          state="empty"
+        <StreakCard streak={streakResult} loading={loadingLogs} />
+
+        {/* ROW 2: Floor Rings (M 4x1) | Hours Today (M 4x1) | Revisions Due (M 4x1) */}
+        <FloorRingsCard
+          floor={settings.floor}
+          problems={dailyCounters.problems}
+          revisions={dailyCounters.revisions}
+          applications={dailyCounters.applications}
+          dueRevisionsAtStart={todayLog?.dueRevisionsAtStart || 0}
+          loading={loadingSettings || loadingTodayLog}
         />
 
-        {/* DSA Patterns Coverage (XL) */}
-        <BentoCard
-          size="XL"
-          icon={<Code2 className="h-4 w-4 text-accent-indigo" />}
-          title="DSA Pattern Mastery Engine"
-        >
-          <div className="flex flex-col justify-center h-full space-y-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted">Algorithmic Problem Solves</span>
-              <span className="font-mono text-accent-ice">0 Solved / Target 150</span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-surface-2">
-              <div className="h-2 rounded-full bg-accent-indigo w-0" />
-            </div>
-            <p className="text-xs text-muted">
-              Prepare Two Pointers, Sliding Window, and Fast & Slow Pointers for Week 1 goals.
-            </p>
-          </div>
-        </BentoCard>
+        <HoursCard
+          startupHours={todayLog?.startupHours || 0}
+          gymHours={todayLog?.gymHours || 0}
+          gymDone={todayLog?.gymDone || false}
+          targets={settings.targets}
+          loading={loadingSettings || loadingTodayLog}
+        />
+
+        <RevisionsDueCard dueCount={dueRevisionsCount} loading={loadingProblems} />
+
+        {/* ROWS 3-4: Today's Checklist (L 4x2) | 90-Day Heatmap (H 8x1) + Week at a Glance (M 4x1) + Mocks (M 4x1) */}
+        <ChecklistCard
+          scheduleBlocks={settings.scheduleBlocks}
+          completedMap={todayLog?.checklist || {}}
+          onToggleBlock={handleToggleBlock}
+          loading={loadingSettings || loadingTodayLog}
+        />
+
+        <HeatmapCard
+          planStartDate={settings.planStartDate}
+          planLengthDays={settings.planLengthDays}
+          logsByDate={logsByDate}
+          loading={loadingSettings || loadingLogs}
+        />
+
+        <WeekGlanceCard
+          problemsThisWeek={problemsThisWeek}
+          applicationsThisWeek={applicationsThisWeek}
+          mocksThisWeek={mocksThisWeek}
+          floor={settings.floor}
+          targets={settings.targets}
+          loading={loadingSettings || loadingProblems || loadingApplications}
+        />
+
+        <MocksCard mocks={allMocks || []} loading={loadingMocks} />
+
+        {/* ROWS 5-6: Job Feed Preview (L 4x2) | Pattern Coverage (XL 8x2) */}
+        <JobPreviewCard jobs={allJobs || []} loading={loadingJobs} />
+
+        <PatternCoverageCard
+          patternTargets={settings.patternTargets}
+          problems={allProblems || []}
+          loading={loadingSettings || loadingProblems}
+        />
+
+        {/* ROW 7: Pipeline Funnel (M 4x1) | Roadmap Milestone (M 4x1) | Mistake to Review (M 4x1) */}
+        <PipelineFunnelCard applications={allApplications || []} loading={loadingApplications} />
+
+        <RoadmapCard roadmap={roadmap} planDay={planDay} loading={loadingRoadmap} />
+
+        <MistakeCard mistakes={allMistakes || []} loading={loadingMistakes} />
+
+        {/* ROW 8: Energy & Sleep Trend (W 6x1) | Scraper Health (W 6x1) */}
+        <TrendsCard logsByDate={logsByDate} loading={loadingLogs} />
+
+        <ScraperHealthCard runs={allRuns || []} loading={loadingRuns} />
       </BentoGrid>
     </div>
   );

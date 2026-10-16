@@ -47,6 +47,15 @@ This log records every non-obvious architectural, design, and dependency decisio
 - **Rationale & Alternatives Considered:** Direct writes without preview could result in silent failures or partial corruptions. In-memory dry run gives full visibility and user control before mutating the database.
 - **Impact & Consequences:** Users can inspect what is about to be imported and cancel safely if counts or structures look unexpected.
 
+### ADR-005: Pure Domain Floor & Streak Engine with At-Risk Evaluation
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** Spec 7.2 and 7.3 require calculating daily floor compliance (with dueRevisionsAtStart == 0 boundary condition) and consecutive-day streaks. Evaluating streaks strictly from today would cause a false "0-day streak" during active working hours before today's daily log is submitted.
+- **Decision:** Implemented `evaluateFloorMet()` and `calculateStreak()` in `packages/shared`. If today's floor is not yet met, the engine evaluates continuity starting from yesterday (`referenceDate - 1`). If yesterday was completed, the current streak count is preserved, and today is flagged with `atRisk: true`. If yesterday was missed, the streak is 0. If today is completed, today is counted and `atRisk: false`.
+- **Rationale & Alternatives Considered:** Treating an unclosed active day as an instant streak failure destroys habit momentum and contradicts Spec 7.3. The `atRisk` flag allows the UI to surface motivational warning banners after 18:00 IST while keeping the streak technically intact until midnight.
+- **Impact & Consequences:** Dashboard hero, streak card, and in-app warning banners dynamically reflect `atRisk` state.
+
 ---
 
 ### ADR Template (For Future Entries)
