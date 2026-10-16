@@ -133,7 +133,41 @@ export async function loadDemoData(uid: string): Promise<boolean> {
       createdAt: serverTimestamp(),
     });
 
-    // 5. Demo Daily Log
+    // 5. Demo Scraped Jobs
+    const jobsCol = collection(db, 'users', uid, 'jobs');
+    const j1 = doc(jobsCol);
+    batch.set(j1, {
+      title: 'Junior Software Engineer (Full Stack)',
+      company: 'Postman',
+      location: 'Bengaluru, India',
+      url: 'https://careers.postman.com/jobs/101',
+      source: 'greenhouse',
+      salaryLPA: 16,
+      salaryEstimated: false,
+      postedDate: today,
+      status: 'new',
+      closed: false,
+      tags: ['TypeScript', 'React', 'Node.js'],
+      createdAt: serverTimestamp(),
+    });
+
+    const j2 = doc(jobsCol);
+    batch.set(j2, {
+      title: 'Member of Technical Staff 1',
+      company: 'Groww',
+      location: 'Bengaluru, India',
+      url: 'https://groww.in/careers/mts1',
+      source: 'ashby',
+      salaryLPA: 20,
+      salaryEstimated: true,
+      postedDate: today,
+      status: 'saved',
+      closed: false,
+      tags: ['Java', 'Spring Boot', 'Microservices'],
+      createdAt: serverTimestamp(),
+    });
+
+    // 6. Demo Daily Log
     const logDoc = doc(db, 'users', uid, 'dailyLogs', today);
     batch.set(logDoc, {
       date: today,

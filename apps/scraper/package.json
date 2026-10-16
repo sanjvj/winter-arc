@@ -7,7 +7,11 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "lint": "eslint src/ --ext .ts",
-    "build": "tsc"
+    "build": "tsc",
+    "scrape": "pnpm build && node dist/cli.js run",
+    "scrape:dry": "pnpm build && node dist/cli.js dry-run",
+    "scrape:discover": "pnpm build && node dist/cli.js discover",
+    "scrape:test": "pnpm build && node dist/cli.js test-source"
   },
   "dependencies": {
     "@winter-arc/shared": "workspace:*",

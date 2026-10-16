@@ -10,9 +10,10 @@ import { InAppBanners } from './in-app-banners';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const normalizedPath = pathname && pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname || '';
 
   // If on /login or /design, don't show the standard app navigation shell
-  const isExcluded = pathname === '/login' || pathname === '/design';
+  const isExcluded = normalizedPath === '/login' || normalizedPath === '/design';
 
   if (isExcluded) {
     return <main>{children}</main>;

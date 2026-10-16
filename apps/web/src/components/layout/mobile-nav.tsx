@@ -26,6 +26,7 @@ import { useAuth } from '@/contexts/auth-context';
 
 export function MobileNav() {
   const pathname = usePathname();
+  const normalizedPath = pathname && pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname || '';
   const { signOut } = useAuth();
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -58,7 +59,7 @@ export function MobileNav() {
             <div className="grid grid-cols-2 gap-2 pt-4">
               {moreItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = pathname === item.href;
+                const isActive = normalizedPath === item.href;
                 return (
                   <Link
                     key={item.href}
@@ -99,7 +100,7 @@ export function MobileNav() {
           href="/"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            pathname === '/' ? 'text-accent-ice' : 'text-muted',
+            (normalizedPath === '' || normalizedPath === '/') ? 'text-accent-ice' : 'text-muted',
           )}
         >
           <LayoutDashboard className="h-4 w-4" />
@@ -110,7 +111,7 @@ export function MobileNav() {
           href="/log"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            pathname === '/log' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/log' ? 'text-accent-ice' : 'text-muted',
           )}
         >
           <Clock className="h-4 w-4" />
@@ -130,7 +131,7 @@ export function MobileNav() {
           href="/dsa"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            pathname === '/dsa' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/dsa' ? 'text-accent-ice' : 'text-muted',
           )}
         >
           <Code2 className="h-4 w-4" />
@@ -141,7 +142,7 @@ export function MobileNav() {
           href="/jobs"
           className={cn(
             'flex flex-col items-center gap-1 text-[10px] font-medium transition-colors',
-            pathname === '/jobs' ? 'text-accent-ice' : 'text-muted',
+            normalizedPath === '/jobs' ? 'text-accent-ice' : 'text-muted',
           )}
         >
           <Briefcase className="h-4 w-4" />

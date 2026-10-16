@@ -53,6 +53,7 @@ export const navigationItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const normalizedPath = pathname && pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname || '';
   const { user, signOut } = useAuth();
 
   const { data: remoteSettings } = useDoc<Settings>('settings', 'main', SettingsSchema);
@@ -118,7 +119,7 @@ export function Sidebar() {
         <nav className="flex flex-col gap-1 overflow-y-auto max-h-[calc(100vh-250px)] pr-1">
           {navigationItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = normalizedPath === item.href;
             return (
               <Link
                 key={item.href}

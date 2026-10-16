@@ -41,13 +41,17 @@ export function AddProblemDrawer({ isOpen, onClose, onProblemAdded }: AddProblem
   const [tagsInput, setTagsInput] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Focus URL input on open
+  // Focus URL input on open if no other element has active focus
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        urlInputRef.current?.focus();
-      }, 50);
+    if (!isOpen) {
+      return () => {};
     }
+    const timer = setTimeout(() => {
+      if (!document.activeElement || document.activeElement === document.body) {
+        urlInputRef.current?.focus();
+      }
+    }, 50);
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   // Handle URL change & auto-detection
@@ -72,6 +76,11 @@ export function AddProblemDrawer({ isOpen, onClose, onProblemAdded }: AddProblem
 
     if (!title.trim()) {
       toast.warn('Missing Title', 'Please enter a problem title.');
+      return;
+    }
+
+    if (url.trim() && !/^https?:\/\//i.test(url.trim())) {
+      toast.warn('Invalid URL', 'Please enter a valid URL starting with http:// or https://, or leave it blank.');
       return;
     }
 

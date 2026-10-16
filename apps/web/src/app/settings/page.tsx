@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { useDoc, setDocument } from '@/lib/data';
+import { useDoc, setDocument, updateDocument } from '@/lib/data';
 import {
   Settings,
   SettingsSchema,
@@ -203,19 +203,42 @@ export default function SettingsPage() {
     if (!user) return;
     setIsTokenLoading(true);
     try {
-      const idToken = await user.getIdToken();
-      const res = await fetch('/api/token', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to generate token');
+      let token = '';
+      try {
+        const idToken = await user.getIdToken();
+        const res = await fetch('/api/token', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          token = data.token;
+        }
+      } catch {
+        // Fallback to client-side Web Crypto API
       }
-      setGeneratedToken(data.token);
+
+      if (!token) {
+        // 32-byte cryptographically secure random token generated in browser
+        const randomBytes = new Uint8Array(32);
+        window.crypto.getRandomValues(randomBytes);
+        token = Array.from(randomBytes, (b) => b.toString(16).padStart(2, '0')).join('');
+
+        // Compute SHA-256 hash using Web Crypto API
+        const encoder = new TextEncoder();
+        const hashBuffer = await window.crypto.subtle.digest('SHA-256', encoder.encode(token));
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+
+        // Save SHA-256 hash to Firestore settings/main
+        await updateDocument(user.uid, 'settings', 'main', { apiTokenHash: hashHex });
+      }
+
+      setGeneratedToken(token);
       setTokenModalOpen(true);
+      toast.success('Token Generated', 'Personal API token created and hash saved to Firestore.');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Token generation error';
       toast.error('Token Generation Failed', message);
@@ -235,15 +258,22 @@ export default function SettingsPage() {
     }
     setIsTokenLoading(true);
     try {
-      const idToken = await user.getIdToken();
-      const res = await fetch('/api/token', {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${idToken}`,
-        },
-      });
-      if (!res.ok) {
-        throw new Error('Failed to revoke token');
+      let revoked = false;
+      try {
+        const idToken = await user.getIdToken();
+        const res = await fetch('/api/token', {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        });
+        if (res.ok) revoked = true;
+      } catch {
+        // Fallback to client-side revoke
+      }
+
+      if (!revoked) {
+        await updateDocument(user.uid, 'settings', 'main', { apiTokenHash: '' });
       }
       toast.success('Token Revoked', 'API token hash removed from Firestore.');
     } catch (err: unknown) {

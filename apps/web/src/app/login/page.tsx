@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { Flame, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function LoginPage() {
-  const { signInWithGoogle, user, isOwner } = useAuth();
+  const { signInWithGoogle, signInWithToken, user, isOwner } = useAuth();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isSigningIn, setIsSigningIn] = useState(false);
@@ -31,6 +31,28 @@ export default function LoginPage() {
       setIsSigningIn(false);
     }
   };
+
+  const handleEmulatorSignIn = async (email: string) => {
+    try {
+      setError(null);
+      setIsSigningIn(true);
+      const res = await fetch('/api/dev-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch dev token');
+      await signInWithToken(data.token, email);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to sign in with emulator';
+      setError(message);
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const isEmulator = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-bg p-6">
@@ -70,6 +92,32 @@ export default function LoginPage() {
             <ShieldCheck className="h-4 w-4" />
             {isSigningIn ? 'Signing In...' : 'Sign In with Google'}
           </button>
+
+          {isEmulator && (
+            <div className="flex flex-col gap-2 pt-2 border-t border-border-token">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                Emulator Test Logins
+              </span>
+              <button
+                id="test-signin-owner"
+                type="button"
+                onClick={() => handleEmulatorSignIn('sanjay@winterarc.local')}
+                disabled={isSigningIn}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-accent-ice/30 bg-accent-ice/10 px-4 py-2.5 text-xs font-medium text-accent-ice hover:bg-accent-ice/20 disabled:opacity-50"
+              >
+                Sign In as Owner (sanjay@winterarc.local)
+              </button>
+              <button
+                id="test-signin-stranger"
+                type="button"
+                onClick={() => handleEmulatorSignIn('stranger@example.com')}
+                disabled={isSigningIn}
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-status-danger/30 bg-status-danger/10 px-4 py-2.5 text-xs font-medium text-status-danger hover:bg-status-danger/20 disabled:opacity-50"
+              >
+                Sign In as Stranger (stranger@example.com)
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 border-t border-border-token pt-4 text-center">

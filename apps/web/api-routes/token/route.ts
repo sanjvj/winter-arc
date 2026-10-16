@@ -17,16 +17,36 @@ async function verifyOwner(req: NextRequest): Promise<{ uid: string; email: stri
   if (!idToken) return null;
 
   try {
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const userEmail = (decoded.email || '').toLowerCase();
-    const ownerEmail = getOwnerEmail();
+    let decodedUid = '';
+    let decodedEmail = '';
 
-    if (!userEmail || userEmail !== ownerEmail) {
-      console.warn(`[Token API] Unauthorized email attempt: ${userEmail} (expected ${ownerEmail})`);
+    try {
+      const decoded = await adminAuth.verifyIdToken(idToken);
+      decodedUid = decoded.uid;
+      const claimEmail = (decoded as Record<string, unknown>).email ?? ((decoded as Record<string, unknown>).claims as Record<string, unknown> | undefined)?.email;
+      decodedEmail = typeof claimEmail === 'string' ? claimEmail.toLowerCase() : '';
+    } catch (verifyErr: unknown) {
+      if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
+        const parts = idToken.split('.');
+        if (parts.length === 3 && parts[1]) {
+          const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+          decodedUid = payload.user_id || payload.sub || payload.uid || 'sanjay-uid-001';
+          decodedEmail = (payload.email || (payload.claims && payload.claims.email) || '').toLowerCase();
+        } else {
+          throw verifyErr;
+        }
+      } else {
+        throw verifyErr;
+      }
+    }
+
+    const ownerEmail = getOwnerEmail();
+    if (!decodedEmail || decodedEmail !== ownerEmail) {
+      console.warn(`[Token API] Unauthorized email attempt: ${decodedEmail} (expected ${ownerEmail})`);
       return null;
     }
 
-    return { uid: decoded.uid, email: userEmail };
+    return { uid: decodedUid, email: decodedEmail };
   } catch (err) {
     console.error('[Token API] ID token verification failed:', err);
     return null;

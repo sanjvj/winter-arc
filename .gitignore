@@ -9,6 +9,7 @@
 !/pnpm-workspace.yaml
 !/tsconfig.base.json
 !/firebase.json
+!/.firebaserc
 !/firestore.rules.template
 !/firestore.indexes.json
 !/README.md

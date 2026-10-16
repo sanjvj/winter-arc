@@ -5,3 +5,5 @@ export * from './pagination';
 export * from './seed';
 export * from './export-import';
 export * from './demo-data';
+export * from './client-scraper';
+

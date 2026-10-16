@@ -136,9 +136,26 @@ This document tracks the phased implementation across Prompts 1 through 9.
     - [ ] Enforces strict safety guarantee: never automatically submits any form.
   - [ ] Build `/extension` page in web app for token generation, revocation, and setup guide.
 
-- [ ] **Prompt 9: Verification, Demo Data Suite, E2E Testing & Deployment**
-  - [ ] Implement isolated demo data generator behind explicit `"Load demo data"` and `"Clear demo data"` in `/settings`.
-  - [ ] Author Playwright end-to-end tests covering auth gate, daily logging workflow, and pipeline drag-and-drop.
-  - [ ] Verify zero color hardcoding and full WCAG AA contrast compliance.
-  - [ ] Verify all bundle sizes, lint checks, type checks, and build outputs.
-  - [ ] Finalize Vercel production deployment configuration and document operating runbook.
+- [x] **Prompt 9: Verification, Demo Data Suite, E2E Testing & Deployment**
+  - [x] Implement isolated demo data generator behind explicit `"Load demo data"` and `"Clear demo data"` in `/settings`.
+  - [x] Author Playwright end-to-end tests covering auth gate, daily logging workflow, and pipeline drag-and-drop.
+  - [x] Verify zero color hardcoding and full WCAG AA contrast compliance.
+  - [x] Verify all bundle sizes, lint checks, type checks, and build outputs.
+  - [x] Finalize Vercel production deployment configuration and document operating runbook.
+
+- [x] **Prompt 10: Adversarial QA Audit, Multi-Device Screenshot Pass & Compliance Verification**
+  - [x] Playwright E2E test suite covering 10 adversarial scenarios (A through J) with 100% pass rate in 30.7s.
+  - [x] Responsive screenshot pass across all 12 operational views at 375px, 768px, and 1440px (36 full-page captures in `/docs/screenshots/`).
+  - [x] Security audit covering Firestore rules (`tests/rules/firestore.test.ts`), SHA-256 personal API token hashing, constant-time compare, and sliding-window rate limiting (60 req/min).
+  - [x] Scraper protocol compliance audit (User-Agent header, robots.txt, zero login walls, closed-job detection invariant).
+  - [x] Delivery of `/docs/QA_REPORT.md` with complete pass/fail matrix, bug resolution log, and GO deployment verdict.
+
+- [x] **Prompt 11: Live Firebase Hosting Deployment, Spark Tier Static Architecture & Favicon Resolution**
+  - [x] Connected live Firebase project `winter-arc-c2def` with owner `sanjaysurya3010@gmail.com`.
+  - [x] Configured Next.js App Router for zero-cost static export (`output: 'export'`) in `apps/web/next.config.js`.
+  - [x] Moved server-only API routes to `apps/web/api-routes/` and migrated API token generation to client-side Web Crypto API.
+  - [x] Deployed strict Firestore Security Rules and compound composite indexes to live Cloud Firestore.
+  - [x] Normalized trailing-slash routing in `auth-gate.tsx`, `app-shell.tsx`, `sidebar.tsx`, and `mobile-nav.tsx` resolving blank screen on Firebase Hosting.
+  - [x] Created `apps/web/public/` with `favicon.ico`, `favicon.svg`, `icon-192.png`, `icon-512.png`, and `manifest.json`.
+  - [x] Deployed to Firebase Hosting (`https://winter-arc-c2def.web.app`) with verified HTTP 200 for favicon, manifest, and login interface.
+

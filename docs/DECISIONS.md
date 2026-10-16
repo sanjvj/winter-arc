@@ -88,6 +88,62 @@ This log records every non-obvious architectural, design, and dependency decisio
 - **Rationale & Alternatives Considered:** Pure calculation logic and honest-read rule evaluation reside exclusively in `packages/shared` with 100% test coverage, maintaining clean separation between domain logic and presentation.
 - **Impact & Consequences:** The complete tracking loop—applications, mock defense, syllabus milestones, and weekly retrospectives—is fully interactive, strongly typed, and persists to Firestore.
 
+### ADR-008: Adversarial QA Suite Architecture & Playwright E2E Harness
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** Automated end-to-end verification required driving the live application under realistic and adversarial conditions (non-owner access attempts, rapid mobile daily logging under 60 seconds, spaced revision lifecycle, custom token verification against Firebase Auth emulator, and personal API token revocation).
+- **Decision:**
+  1. Configured `@playwright/test` to run against system Google Chrome with `--no-sandbox` and `--disable-setuid-sandbox` targeting local Next.js server (`http://localhost:3000`) and Firebase Emulators (`:9099`, `:8080`).
+  2. Fixed `AuthGate` route ordering so unauthorized users are immediately intercepted with an "Access Denied" view rather than allowed to linger on `/login`.
+  3. Added an emulator-specific fallback in `/api/token` to handle token audience discrepancies when the Auth emulator runs in `singleProjectMode`.
+  4. Structured Playwright selectors to target domain DOM anchors (`span:text-is(...)`, `input[type="date"]`, etc.) instead of ephemeral long-polling network states, resolving long-lived Firestore subscription timeouts.
+- **Rationale & Alternatives Considered:** Unit and component tests alone do not catch full-stack boundary flaws such as custom claim async race conditions or mobile viewport layout clipping.
+- **Impact & Consequences:** All 10 critical user journeys (Scenarios A through J) are validated automatically with 100% pass rates.
+
+### ADR-009: Extension Bridge Authentication, Rate Limiting & Personal Token Lifecycle
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** Manifest V3 companion extensions and external automation require an authenticated bridge to record applied jobs without exposing user passwords or storing credentials.
+- **Decision:**
+  1. Implemented `/api/ext/ping` and `/api/ext/applied` protected by `verifyExtToken` middleware.
+  2. Middleware verifies the incoming token's SHA-256 hash against Firestore `settings/main.apiTokenHash` in constant time.
+  3. Enforced an in-memory sliding window rate limiter capping external requests at 60 requests/minute per token hash, returning `429 Too Many Requests` when exceeded.
+  4. Revoking or rotating the token immediately clears or overwrites the SHA-256 hash in Firestore, instantly rendering former tokens invalid (`401 Unauthorized`).
+- **Rationale & Alternatives Considered:** Using standard user session cookies would violate cross-origin extension isolation policies. Storing solely the SHA-256 hash in Firestore ensures zero token leakage even if the database snapshot were compromised.
+- **Impact & Consequences:** The extension bridge is fully authenticated, resilient to brute force and spam, and supports instantaneous token revocation from Settings.
+
+### ADR-010: Live Firebase Cloud Project Integration (winter-arc-c2def)
+
+- **Date:** 2026-10-16
+- **Status:** Accepted
+- **Context:** The application was initially running against local Firebase Auth and Firestore emulators. The owner provided the production web app Firebase credentials for project `winter-arc-c2def` to connect the live database and client authentication.
+- **Decision:**
+  1. Configured `apps/web/.env.local` and `.env.example` with project `winter-arc-c2def`, including `apiKey`, `authDomain`, `projectId`, `storageBucket`, `messagingSenderId`, `appId`, and `measurementId`.
+  2. Enhanced `apps/web/src/lib/firebase/client.ts` to support optional browser analytics initialization (`firebase/analytics`) and set `winter-arc-c2def` as the default client configuration.
+  3. Updated `apps/web/src/lib/firebase/admin.ts` to fallback to `winter-arc-c2def` for the server-side Admin SDK.
+  4. Initialized `.firebaserc` mapping the default project to `winter-arc-c2def`.
+  5. Toggled `NEXT_PUBLIC_USE_EMULATORS=false` in `.env.local` to direct client traffic to live Firebase Auth and Firestore.
+- **Rationale & Alternatives Considered:** Centralizing credentials in environment variables keeps secret management decoupled from source code, while preserving the ability to switch back to local emulators for automated testing via `NEXT_PUBLIC_USE_EMULATORS=true`.
+- **Impact & Consequences:** Web app directly accesses live Firebase Authentication and Cloud Firestore.
+
+---
+
+### ADR-011: Firebase Hosting Static Export & Trailing Slash Normalization
+
+- **Date:** 2026-10-17
+- **Status:** Accepted
+- **Context:** The user mandated deployment strictly to Firebase Hosting (rejecting Vercel and paid Cloud Functions on the Spark plan). The Next.js web application was built using Next.js App Router. Next.js App Router default SSR routes require Cloud Functions, which require the paid Blaze plan and fail during Firebase CLI packager runs due to monorepo pnpm `workspace:*` links. Furthermore, Firebase Hosting serves directories with trailing slashes (`/login/`), causing strict pathname checks (`pathname === '/login'`) in `AuthGate` and layout navigation components to fail, leading to blank screens and 404s on favicon.
+- **Decision:**
+  1. Configured `apps/web/next.config.js` with `output: 'export'`, `trailingSlash: true`, and `images: { unoptimized: true }`.
+  2. Moved server-only `/api` routes out of the Next.js export bundle into `apps/web/api-routes/`.
+  3. Replaced `/api/token` route handler with client-side Web Crypto API token generation and hashing directly in `apps/web/src/app/settings/page.tsx` writing to Cloud Firestore with client SDK.
+  4. Normalized pathname parsing across `auth-gate.tsx`, `app-shell.tsx`, `sidebar.tsx`, and `mobile-nav.tsx` using `pathname.replace(/\/$/, '')` to seamlessly handle URLs whether rendered with or without trailing slashes.
+  5. Created `apps/web/public/` with `favicon.ico`, `favicon.svg`, `icon-192.png`, `icon-512.png`, and `manifest.json`.
+- **Rationale & Alternatives Considered:** Pure static export eliminates all recurring Cloud Function compute costs, stays 100% within Firebase Hosting's generous Spark free tier, improves page load latency globally via Firebase's CDN edge network, and communicates directly and securely with Cloud Firestore using security rules.
+- **Impact & Consequences:** Zero server compute costs. Seamless routing across all 18 routes on Firebase Hosting. Favicon and PWA manifest 200 OK.
+
 ---
 
 ### ADR Template (For Future Entries)
@@ -98,7 +154,8 @@ This log records every non-obvious architectural, design, and dependency decisio
 - **Date:** YYYY-MM-DD
 - **Status:** Proposed | Accepted | Superseded by ADR-YYY
 - **Context:** What problem or trade-off necessitated this decision?
-- **Decision:** What was chosen?
-- **Rationale & Alternatives Considered:** Why was this chosen over alternatives?
-- **Impact & Consequences:** What are the trade-offs, limitations, or downstream changes?
+- **Decision:** What was chosen and how is it implemented?
+- **Rationale & Alternatives Considered:** Why this approach? What other options were evaluated?
+- **Impact & Consequences:** What positive, negative, or neutral outcomes result?
 ```
+

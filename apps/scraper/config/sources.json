@@ -1,0 +1,68 @@
+[
+  {
+    "type": "greenhouse",
+    "name": "Razorpay",
+    "token": "razorpaysoftwareprivatelimited",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "Groww",
+    "token": "groww",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "InMobi",
+    "token": "inmobi",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "Slice",
+    "token": "slice",
+    "enabled": true
+  },
+  {
+    "type": "lever",
+    "name": "CRED",
+    "company": "cred",
+    "enabled": true
+  },
+  {
+    "type": "lever",
+    "name": "Meesho",
+    "company": "meesho",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "Canonical",
+    "token": "canonical",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "GitLab",
+    "token": "gitlab",
+    "enabled": true
+  },
+  {
+    "type": "greenhouse",
+    "name": "HackerRank",
+    "token": "hackerrank",
+    "enabled": true
+  },
+  {
+    "type": "lever",
+    "name": "Paytm",
+    "company": "paytm",
+    "enabled": true
+  },
+  {
+    "type": "lever",
+    "name": "Zeta",
+    "company": "zeta",
+    "enabled": true
+  }
+]

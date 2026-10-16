@@ -1,5 +1,5 @@
 import '@/styles/globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { fontInter, fontSpaceGrotesk, fontJetBrainsMono } from '@/lib/fonts';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ToastProvider } from '@/components/ui/toast';
@@ -7,9 +7,25 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { AuthGate } from '@/components/auth-gate';
 import { AppShell } from '@/components/layout/app-shell';
 
+export const viewport: Viewport = {
+  themeColor: '#0A0B10',
+  width: 'device-width',
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   title: 'Winter Arc Command Center',
   description: 'Single-tenant personal execution command center for the 90-day SDE-1 hunt.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

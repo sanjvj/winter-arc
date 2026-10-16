@@ -15,7 +15,7 @@ function getAdminApp(): admin.app.App {
   const projectId =
     process.env.FIREBASE_PROJECT_ID ||
     process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
-    'winter-arc-dev';
+    'winter-arc-c2def';
 
   // In emulator mode or without full credentials, initialize with projectId
   if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true' || !process.env.FIREBASE_PRIVATE_KEY) {

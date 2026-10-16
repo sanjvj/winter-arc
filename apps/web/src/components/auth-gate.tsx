@@ -6,16 +6,26 @@ import { useAuth } from '@/contexts/auth-context';
 import { ShieldAlert, LogOut, Loader2 } from 'lucide-react';
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
-  const { user, loading, isOwner, ownerEmail, signOut } = useAuth();
+  const { user, userEmail, loading, isOwner, ownerEmail, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const normalizedPath = pathname && pathname.length > 1 ? pathname.replace(/\/$/, '') : pathname || '';
+  const isPublicPage = normalizedPath === '/login' || normalizedPath === '/design';
   const [deniedEmail, setDeniedEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (loading) return;
 
-    // If on /login or /design, don't redirect away
-    if (pathname === '/login' || pathname === '/design') {
+    if (user && !isOwner) {
+      const email = userEmail || user.email || 'No email associated';
+      setDeniedEmail(email);
+      // Spec: signed-in users whose email is not NEXT_PUBLIC_OWNER_EMAIL are signed out and see "Access denied"
+      void signOut();
+      return;
+    }
+
+    // If on public routes (/login or /design), don't redirect away
+    if (isPublicPage) {
       return;
     }
 
@@ -24,12 +34,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    if (user.email && !isOwner) {
-      const email = user.email;
-      setDeniedEmail(email);
-      // Spec: signed-in users whose email is not NEXT_PUBLIC_OWNER_EMAIL are signed out and see "Access denied"
-      void signOut();
-    } else if (user.email && isOwner) {
+    if (user.email && isOwner) {
       // Idempotently ensure initial settings/main and roadmap/main are seeded
       void import('@/lib/data/seed').then(({ seedFirstLogin }) => {
         void seedFirstLogin(user.uid).catch((err) => {
@@ -37,7 +42,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
         });
       });
     }
-  }, [user, loading, isOwner, pathname, router, signOut]);
+  }, [user, userEmail, loading, isOwner, isPublicPage, router, signOut]);
 
   if (loading) {
     return (
@@ -90,7 +95,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }
 
   // If user is not logged in and not on a public path
-  if (!user && pathname !== '/login' && pathname !== '/design') {
+  if (!user && !isPublicPage) {
     return null;
   }
 
