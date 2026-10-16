@@ -1,0 +1,26 @@
+{
+  "name": "winter-arc-command-center",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@9.15.9",
+  "scripts": {
+    "dev": "pnpm --filter @winter-arc/web dev",
+    "dev:emu": "./scripts/with-env.sh concurrently -k -n \"EMU,WEB\" -c \"yellow,cyan\" \"firebase emulators:start --only auth,firestore\" \"wait-on tcp:9099 tcp:8080 && NEXT_PUBLIC_USE_EMULATORS=true pnpm --filter @winter-arc/web dev\"",
+    "build": "pnpm run rules:build && pnpm -r run build",
+    "lint": "pnpm -r run lint",
+    "typecheck": "pnpm -r run typecheck",
+    "test": "pnpm --filter @winter-arc/shared run test",
+    "test:rules": "./scripts/with-env.sh firebase emulators:exec --only firestore \"vitest run tests/rules\"",
+    "rules:build": "node scripts/build-rules.js",
+    "format": "prettier --write \"{apps,packages,docs,scripts,tests}/**/*.{ts,tsx,js,json,md}\" \"*.{json,js,md}\"",
+    "format:check": "prettier --check \"{apps,packages,docs,scripts,tests}/**/*.{ts,tsx,js,json,md}\" \"*.{json,js,md}\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
+    "concurrently": "^8.2.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5",
+    "wait-on": "^7.2.0"
+  }
+}

@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Single owner security model
+    // Access is strictly restricted to /users/{uid}/** where auth uid matches and token email is the literal owner email
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == uid
+                         && request.auth.token.email == '__OWNER_EMAIL__';
+    }
+
+    // Deny all root and undeclared access paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

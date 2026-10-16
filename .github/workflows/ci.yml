@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Lint, Typecheck, Test, Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.9
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Firestore Rules
+        run: pnpm rules:build
+        env:
+          OWNER_EMAIL: sanjay@winterarc.local
+
+      - name: Run Linters
+        run: pnpm lint
+
+      - name: Run Typecheck
+        run: pnpm typecheck
+
+      - name: Run Tests
+        run: pnpm test
+
+      - name: Build Packages & Apps
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ci-test-key
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: winter-arc-ci.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: winter-arc-ci
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: winter-arc-ci.appspot.com
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: 1234567890
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:1234567890:web:ci123456
+          NEXT_PUBLIC_OWNER_EMAIL: sanjay@winterarc.local
+          OWNER_EMAIL: sanjay@winterarc.local

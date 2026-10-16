@@ -1,0 +1,3 @@
+# Winter Arc Command Center
+
+The **Winter Arc Command Center** is a personal, single-tenant productivity and career execution dashboard built for a full-stack engineer tackling an intensive 90-day job hunt while balancing startup commitments and physical training. It unifies high-speed daily habit logging (under 60 seconds), algorithmic problem tracking with spaced repetition revisions, automated daily job scraping (06:00 IST cron), pipeline Kanban tracking, and a companion Chrome extension for fast application form autofilling—all designed with a focused, dark-themed "Winter Arc" Bento Grid aesthetic.
