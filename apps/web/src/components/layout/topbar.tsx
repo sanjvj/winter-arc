@@ -16,14 +16,14 @@ export function Topbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-white/10 bg-black/80 px-6 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border-token bg-bg/85 px-6 backdrop-blur-xl">
       {/* Today's Date in IST */}
-      <div className="flex items-center gap-2.5 text-xs font-mono text-zinc-400">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6D001A]/20 border border-[#6D001A]/30 text-white">
-          <CalendarDays className="h-3.5 w-3.5 text-[#A30028]" />
+      <div className="flex items-center gap-2.5 text-xs font-mono text-muted">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-burgundy/10 border border-accent-burgundy/30 text-accent-burgundy-glow">
+          <CalendarDays className="h-3.5 w-3.5" />
         </div>
-        <span className="font-semibold text-white">{istDateString || 'IST Synchronized'}</span>
-        <span className="hidden sm:inline-block rounded-md bg-white/[0.06] border border-white/10 px-2 py-0.5 text-[10px] text-zinc-300 font-mono">
+        <span className="font-semibold text-text">{istDateString || 'IST Synchronized'}</span>
+        <span className="hidden sm:inline-block rounded-md bg-surface border border-border-token px-2 py-0.5 text-[10px] text-muted font-mono">
           ASIA/KOLKATA (UTC+05:30)
         </span>
       </div>
@@ -31,14 +31,14 @@ export function Topbar() {
       {/* Theme Toggle */}
       <div className="flex items-center gap-3">
         {mounted && (
-          <div className="flex items-center rounded-xl border border-white/10 bg-[#0C0C10] p-1 shadow-sm">
+          <div className="flex items-center rounded-xl border border-border-token bg-surface p-1 shadow-sm">
             <button
               onClick={() => setTheme('dark')}
               title="Dark Theme"
               className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'dark'
-                  ? 'bg-[#6D001A] text-white shadow-burgundy'
-                  : 'text-zinc-500 hover:text-white'
+                  ? 'bg-accent-burgundy text-white shadow-burgundy'
+                  : 'text-muted hover:text-text'
               }`}
             >
               <Moon className="h-3.5 w-3.5" />
@@ -48,8 +48,8 @@ export function Topbar() {
               title="Light Theme"
               className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'light'
-                  ? 'bg-[#6D001A] text-white shadow-burgundy'
-                  : 'text-zinc-500 hover:text-white'
+                  ? 'bg-accent-burgundy text-white shadow-burgundy'
+                  : 'text-muted hover:text-text'
               }`}
             >
               <Sun className="h-3.5 w-3.5" />
@@ -59,8 +59,8 @@ export function Topbar() {
               title="System Preference"
               className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors ${
                 theme === 'system'
-                  ? 'bg-[#6D001A] text-white shadow-burgundy'
-                  : 'text-zinc-500 hover:text-white'
+                  ? 'bg-accent-burgundy text-white shadow-burgundy'
+                  : 'text-muted hover:text-text'
               }`}
             >
               <Laptop className="h-3.5 w-3.5" />

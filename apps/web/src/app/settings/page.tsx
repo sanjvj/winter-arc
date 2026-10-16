@@ -302,7 +302,7 @@ export default function SettingsPage() {
           <span className="font-mono text-xs uppercase tracking-wider text-accent-ice">
             System Configuration
           </span>
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-text mt-1">
+          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-text mt-1">
             Command Center Settings
           </h1>
           <p className="text-xs text-muted mt-0.5">

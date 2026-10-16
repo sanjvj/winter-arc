@@ -148,7 +148,7 @@ export default function MocksPage() {
           <div className="flex items-center gap-2 text-accent-ice font-mono text-xs uppercase tracking-wider">
             <Mic className="h-4 w-4" /> Technical & Behavioral Defense
           </div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-text mt-1">
+          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-text mt-1">
             Mock Interviews
           </h1>
           <p className="text-sm text-muted mt-1">

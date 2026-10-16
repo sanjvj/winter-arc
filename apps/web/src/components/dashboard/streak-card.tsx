@@ -32,7 +32,7 @@ export function StreakCard({ streak, loading = false }: StreakCardProps) {
     >
       <div className="flex flex-col justify-between h-full py-1">
         <div className="flex items-baseline gap-2">
-          <span className="font-display text-4xl md:text-5xl font-bold tracking-tight text-white">
+          <span className="font-display text-5xl md:text-6xl font-medium tracking-tight text-text">
             {streak.currentStreak}
           </span>
           <span className="font-mono text-xs text-muted uppercase tracking-wider">
@@ -44,7 +44,7 @@ export function StreakCard({ streak, loading = false }: StreakCardProps) {
           <div className="flex items-center gap-1.5">
             <Trophy className="h-3.5 w-3.5 text-accent-burgundy-glow" />
             <span>
-              Best: <strong className="text-white">{streak.longestStreak}d</strong>
+              Best: <strong className="text-text">{streak.longestStreak}d</strong>
             </span>
           </div>
           <div>

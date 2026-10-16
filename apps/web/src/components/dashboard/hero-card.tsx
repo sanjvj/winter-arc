@@ -63,11 +63,11 @@ export function HeroCard({
     >
       <div className="flex flex-col justify-between h-full py-1">
         <div>
-          <h2 className="font-display text-xl md:text-2xl font-bold tracking-tight text-white">
+          <h2 className="font-display text-2xl md:text-3xl lg:text-4xl font-semibold tracking-tight text-text">
             {getGreeting()}, {ownerName || 'Sanjay'}
           </h2>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="font-mono text-xs font-semibold text-accent-burgundy-glow">
+          <div className="flex items-center gap-2 mt-1.5">
+            <span className="font-mono text-sm font-medium text-accent-burgundy-glow">
               Day {planDay} of {planLengthDays}
             </span>
             <span className="text-muted text-xs">•</span>

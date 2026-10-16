@@ -77,7 +77,7 @@ export default function DsaPage() {
           <div className="flex items-center gap-2 text-accent-ice font-mono text-xs uppercase tracking-wider">
             <Code2 className="h-4 w-4" /> Algorithmic Problem Tracker
           </div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-text mt-1">
+          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-text mt-1">
             DSA & Patterns
           </h1>
           <p className="text-sm text-muted mt-0.5">

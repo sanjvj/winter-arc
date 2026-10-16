@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Briefcase, Search, ExternalLink, Bookmark, Check, X, Building2, MapPin, RefreshCw } from 'lucide-react';
-import { Job, JobSchema, todayIST } from '@winter-arc/shared';
+import { Job, JobSchema, todayIST, isIndiaOrRemote } from '@winter-arc/shared';
 import { useCollection, updateDocument, addDocument, syncLiveJobsFromBrowser } from '@/lib/data';
 import { useAuth } from '@/contexts/auth-context';
 import { toast } from '@/components/ui/toast';
@@ -18,11 +18,15 @@ export default function JobsPage() {
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
-      // Filter by status tab
+      // 1. Enforce location filter: only India or Remote
+      if (!isIndiaOrRemote(job.location)) {
+        return false;
+      }
+      // 2. Filter by status tab
       if (statusFilter !== 'all' && job.status !== statusFilter) {
         return false;
       }
-      // Filter by search query
+      // 3. Filter by search query
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const matchesTitle = job.title.toLowerCase().includes(query);
@@ -96,14 +100,14 @@ export default function JobsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-token">
         <div>
-          <div className="flex items-center gap-2 text-accent-ice font-mono text-xs uppercase tracking-wider">
-            <Briefcase className="h-4 w-4" /> 06:00 IST Scraper Feed
+          <div className="flex items-center gap-2 text-accent-burgundy-glow font-mono text-xs uppercase tracking-wider">
+            <Briefcase className="h-4 w-4" /> 06:00 IST Scraper Feed • India & Remote Only
           </div>
-          <h1 className="font-display text-2xl md:text-3xl font-bold tracking-tight text-text mt-1">
+          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-text mt-1">
             Job Feed
           </h1>
-          <p className="text-sm text-muted mt-0.5">
-            Curated SDE-1 / fresher openings normalized with LPA salaries and keyword rankings.
+          <p className="text-sm md:text-base text-muted mt-1">
+            Curated SDE-1 / fresher openings in India and open Remote roles normalized with LPA salaries.
           </p>
         </div>
 

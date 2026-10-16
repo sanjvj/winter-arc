@@ -23,10 +23,9 @@ const config: Config = {
         'status-danger': 'var(--danger-token)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        display: ['var(--font-aveton)', 'Aveton', 'var(--font-space-grotesk)', 'sans-serif'],
-        aveton: ['var(--font-aveton)', 'Aveton', 'sans-serif'],
-        mono: ['var(--font-jetbrains-mono)', 'monospace'],
+        sans: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        display: ['var(--font-inter)', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
       },
       borderRadius: {
         bento: '20px',

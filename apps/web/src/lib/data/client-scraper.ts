@@ -1,6 +1,6 @@
-import { collection, writeBatch, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, writeBatch, doc, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
-import { Job } from '@winter-arc/shared';
+import { Job, isIndiaOrRemote } from '@winter-arc/shared';
 
 const SOURCES = [
   { type: 'greenhouse', name: 'Razorpay', token: 'razorpaysoftwareprivatelimited' },
@@ -88,6 +88,10 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
 
         for (const item of jobs) {
           if (!isTargetJob(item.title)) continue;
+          const loc = item.location?.name || 'Remote';
+          // Strictly allow only India or open Remote roles
+          if (!isIndiaOrRemote(loc)) continue;
+
           const postedDate = item.updated_at ? item.updated_at.slice(0, 10) : today;
           const tags = extractTags(item.title, item.content || '');
           const id = `gh-${src.name.toLowerCase()}-${item.id}`;
@@ -95,7 +99,7 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
             id,
             title: item.title,
             company: src.name,
-            location: item.location?.name || 'Remote',
+            location: loc,
             url: item.absolute_url,
             source: 'greenhouse',
             postedDate,
@@ -114,6 +118,10 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
 
         for (const item of list) {
           if (!isTargetJob(item.text)) continue;
+          const loc = item.categories?.location || 'Remote';
+          // Strictly allow only India or open Remote roles
+          if (!isIndiaOrRemote(loc)) continue;
+
           const postedDate = item.createdAt ? new Date(item.createdAt).toISOString().slice(0, 10) : today;
           const desc = item.descriptionPlain || item.description || '';
           const tags = extractTags(item.text, desc);
@@ -127,7 +135,7 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
             id,
             title: item.text,
             company: src.name,
-            location: item.categories?.location || 'Remote',
+            location: loc,
             url: item.hostedUrl || item.applyUrl,
             source: 'lever',
             postedDate,
@@ -148,6 +156,20 @@ export async function syncLiveJobsFromBrowser(uid: string): Promise<{ totalFetch
   // Deduplicate and batch write to Firestore
   const batch = writeBatch(db);
   const jobsCol = collection(db, 'users', uid, 'jobs');
+
+  // Purge any existing non-India / non-remote jobs from Firestore collection
+  try {
+    const existingSnap = await getDocs(jobsCol);
+    for (const d of existingSnap.docs) {
+      const data = d.data();
+      if (!isIndiaOrRemote(data.location)) {
+        batch.delete(d.ref);
+      }
+    }
+  } catch (err) {
+    console.warn('[ClientScraper] Failed to query existing jobs for cleanup:', err);
+  }
+
   const uniqueJobs = Array.from(new Map(collectedJobs.map((j) => [j.id, j])).values()).slice(0, 40);
 
   for (const job of uniqueJobs) {

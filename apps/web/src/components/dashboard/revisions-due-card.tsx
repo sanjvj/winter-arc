@@ -51,7 +51,7 @@ export function RevisionsDueCard({ dueCount, loading = false }: RevisionsDueCard
     >
       <div className="flex flex-col justify-between h-full py-1">
         <div className="flex items-baseline gap-2">
-          <span className="font-display text-4xl font-bold tracking-tight text-white">
+          <span className="font-display text-5xl md:text-6xl font-medium tracking-tight text-text">
             {dueCount}
           </span>
           <span className="font-mono text-xs text-muted">

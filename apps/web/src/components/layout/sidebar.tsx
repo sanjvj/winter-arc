@@ -104,7 +104,7 @@ export function Sidebar() {
                 PROTOCOL CAESAR
               </span>
             </div>
-            <h1 className="font-display text-lg font-black tracking-tight text-white uppercase">
+            <h1 className="font-display text-xl font-semibold tracking-tight text-white">
               Winter Arc
             </h1>
           </div>
@@ -164,7 +164,7 @@ export function Sidebar() {
         <nav className="flex flex-col gap-3.5 overflow-y-auto max-h-[calc(100vh-320px)] pr-1 custom-scrollbar">
           {navigationGroups.map((group) => (
             <div key={group.label} className="flex flex-col gap-1">
-              <span className="px-3 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-zinc-500">
+              <span className="px-3 text-[10px] font-mono font-medium uppercase tracking-[0.18em] text-zinc-500">
                 {group.label}
               </span>
               <div className="flex flex-col gap-0.5">
@@ -180,9 +180,9 @@ export function Sidebar() {
                       key={item.href}
                       href={item.href}
                       className={cn(
-                        'group relative flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium transition-all duration-150',
+                        'group relative flex items-center justify-between rounded-xl px-3 py-2 text-sm font-normal transition-all duration-150',
                         isActive
-                          ? 'bg-[#6D001A] text-white font-semibold shadow-burgundy'
+                          ? 'bg-[#6D001A] text-white font-medium shadow-burgundy'
                           : 'text-zinc-400 hover:bg-white/[0.05] hover:text-white',
                       )}
                     >

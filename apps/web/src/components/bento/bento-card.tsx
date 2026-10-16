@@ -55,12 +55,12 @@ export function BentoCard({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2.5">
           {icon && (
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 border border-white/5 text-accent-burgundy-glow shadow-sm">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 border border-border-token text-accent-burgundy-glow shadow-sm">
               {icon}
             </span>
           )}
           {title && (
-            <h3 className="font-display text-sm font-bold tracking-tight text-white">{title}</h3>
+            <h3 className="font-display text-base font-medium tracking-tight text-text">{title}</h3>
           )}
         </div>
         {action && <div className="flex items-center">{action}</div>}

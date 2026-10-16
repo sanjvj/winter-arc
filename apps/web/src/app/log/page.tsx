@@ -331,7 +331,7 @@ export default function LogPage() {
           <div className="flex items-center gap-2 text-accent-ice font-mono text-xs uppercase tracking-wider">
             <Clock className="h-3.5 w-3.5" /> Rapid Daily Logging (&lt;60s)
           </div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-text mt-0.5">
+          <h1 className="font-display text-3xl md:text-4xl font-semibold tracking-tight text-text mt-0.5">
             Log Command
           </h1>
         </div>

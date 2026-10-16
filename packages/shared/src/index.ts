@@ -10,3 +10,4 @@ export * from './url-parser';
 export * from './csv';
 export * from './funnel';
 export * from './weekly-review';
+export * from './job-filter';

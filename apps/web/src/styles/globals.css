@@ -2,22 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Aveton';
-  src: url('/fonts/aveton.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 @layer base {
   :root {
     /* Caesar Modern Trinity: BLACK (#000000), BURGUNDY (#6D001A), WHITE (#FFFFFF) */
     --bg: #000000;
-    --surface: #08080A;
-    --surface-2: #121216;
-    --surface-elevated: #1B1B22;
-    --border-token: rgba(255, 255, 255, 0.12);
+    --surface: #0C0C0E;
+    --surface-2: #16161A;
+    --surface-elevated: #202026;
+    --border-token: rgba(255, 255, 255, 0.1);
     --text-token: #FFFFFF;
     --muted-token: #A1A1AA;
     --accent-ice: #6D001A;
@@ -31,17 +23,17 @@
   }
 
   .light {
-    --bg: #FFFFFF;
-    --surface: #F8F8FA;
-    --surface-2: #EFEFF3;
-    --surface-elevated: #E5E5EB;
-    --border-token: rgba(0, 0, 0, 0.12);
-    --text-token: #000000;
-    --muted-token: #52525B;
+    --bg: #FBFBFC;
+    --surface: #FFFFFF;
+    --surface-2: #F3F3F5;
+    --surface-elevated: #FFFFFF;
+    --border-token: rgba(0, 0, 0, 0.1);
+    --text-token: #111113;
+    --muted-token: #66666E;
     --accent-ice: #6D001A;
     --accent-burgundy: #6D001A;
     --accent-burgundy-glow: #8B0022;
-    --accent-burgundy-tint: rgba(109, 0, 26, 0.15);
+    --accent-burgundy-tint: rgba(109, 0, 26, 0.1);
     --accent-indigo: #8B0022;
     --success-token: #16A34A;
     --warn-token: #D97706;
@@ -51,12 +43,13 @@
   body {
     background-color: var(--bg);
     color: var(--text-token);
-    font-family: var(--font-inter), sans-serif;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     min-height: 100vh;
   }
 
   h1, h2, h3, h4, .font-display {
-    font-family: var(--font-aveton), 'Aveton', var(--font-space-grotesk), sans-serif;
-    letter-spacing: -0.01em;
+    font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    letter-spacing: -0.02em;
+    font-weight: 600;
   }
 }
