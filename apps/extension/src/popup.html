@@ -283,20 +283,26 @@
         <input type="text" id="currentCTC" name="currentCTC" placeholder="Fresher">
       </div>
       <div class="form-group">
-        <label>Authorized in India?</label>
-        <select id="authorizedInIndia" name="authorizedInIndia">
-          <option value="Yes">Yes</option>
-          <option value="No">No</option>
-        </select>
-      </div>
-      <div class="form-group">
         <label>Need Sponsorship?</label>
         <select id="sponsorshipNeeded" name="sponsorshipNeeded">
           <option value="No">No</option>
           <option value="Yes">Yes</option>
         </select>
       </div>
+
+      <div class="form-group full" style="margin-top: 4px;">
+        <label>✨ "Why This Company?" Note Template</label>
+        <textarea id="customWhyCompanyNote" name="customWhyCompanyNote" rows="3" style="resize: vertical; font-size: 11px;" placeholder="I am very excited about what {company} is building and would love to contribute directly as a {role}..."></textarea>
+        <span style="font-size: 9px; color: #71717A; margin-top: 2px;">Automatically fills Wellfound note with {company} and {role} filled in.</span>
+      </div>
+
+      <div class="form-group full" style="margin-top: 4px;">
+        <label>Optional: Google Gemini API Key</label>
+        <input type="password" id="geminiApiKey" name="geminiApiKey" placeholder="AIzaSy... (Leave empty to use smart synthesis)">
+        <span style="font-size: 9px; color: #71717A; margin-top: 2px;">If set, reads company description and generates tailored pitch.</span>
+      </div>
     </div>
+
 
     <button id="save-btn" class="save-btn" type="submit">Save Profile Updates</button>
   </form>

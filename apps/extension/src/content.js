@@ -3,7 +3,10 @@
  * Supports: LinkedIn Easy Apply, Wellfound, Greenhouse, Lever, Ashby, Workday,
  * SmartRecruiters, BambooHR, and any company career portal.
  *
- * Safety Constraint: NEVER auto-submits any application.
+ * Features:
+ * - Smart Contextual Note Synthesis for Wellfound: "What interests you about working for this company?"
+ * - Optional Live Gemini 1.5 Flash AI generation for tailored cover notes
+ * - Safety Constraint: NEVER auto-submits any application.
  */
 
 (function () {
@@ -41,7 +44,128 @@
     sponsorshipNeeded: 'No',
     gender: 'Male',
     summary: 'Full-stack developer (2025 CS graduate) with strong foundations in Data Structures, Algorithms, TypeScript, React, Next.js, and Node.js. Excited to contribute to high-impact product engineering.',
+    geminiApiKey: '',
   };
+
+  /**
+   * Detects Company and Role from active page DOM / title.
+   */
+  function detectCompanyAndRole() {
+    let company = '';
+    let role = '';
+
+    // 1. Wellfound specific selectors
+    const wfCompany = document.querySelector('a[href*="/company/"], [data-test="JobPostingCompany"], .company-name');
+    if (wfCompany && wfCompany.textContent) {
+      company = wfCompany.textContent.trim();
+    }
+
+    // 2. Parse document title
+    const docTitle = document.title || '';
+    if (!company) {
+      const atMatch = docTitle.match(/(?:at|@)\s+([^-|–—]+)/i) || docTitle.match(/^([^-|–—]+)\s*[-|–—]/);
+      if (atMatch && atMatch[1]) {
+        company = atMatch[1].trim();
+      }
+    }
+
+    // 3. Fallback to h1/h2 headings
+    if (!company) {
+      const heading = document.querySelector('h1, h2');
+      if (heading && heading.textContent) {
+        const text = heading.textContent.trim();
+        const m = text.match(/(?:at|@)\s+([A-Za-z0-9\s&]+)/i);
+        if (m && m[1]) company = m[1].trim();
+      }
+    }
+
+    // Clean company name
+    company = company.replace(/^(jobs at|careers at|working at|join)\s+/i, '').trim();
+    if (company.toLowerCase().includes('wellfound')) company = '';
+
+    // Detect role
+    const roleMatch = docTitle.match(/^([^–—\-|@]+)/);
+    if (roleMatch && roleMatch[1] && !roleMatch[1].toLowerCase().includes('wellfound') && !roleMatch[1].toLowerCase().includes('job')) {
+      role = roleMatch[1].trim();
+    }
+    if (!role) {
+      const h1 = document.querySelector('h1');
+      if (h1 && h1.textContent && !h1.textContent.toLowerCase().includes('apply')) {
+        role = h1.textContent.trim();
+      }
+    }
+
+    return {
+      company: company || 'your team',
+      role: role || 'Software Engineer',
+    };
+  }
+
+  /**
+   * Extracts text snippet from job description on page.
+   */
+  function getJobSnippet() {
+    const container = document.querySelector('[data-test="JobDescription"], .job-description, article, main, .content');
+    if (container && container.textContent) {
+      return container.textContent.replace(/\s+/g, ' ').trim().slice(0, 800);
+    }
+    return document.body.textContent.replace(/\s+/g, ' ').trim().slice(0, 800);
+  }
+
+  /**
+   * Smart Contextual Note Synthesis for "Why this company?"
+   */
+  function generateTailoredCompanyNote(company, role, p) {
+    if (p.customWhyCompanyNote && p.customWhyCompanyNote.trim().length > 10) {
+      return p.customWhyCompanyNote
+        .replace(/\{company\}/gi, company)
+        .replace(/\{role\}/gi, role)
+        .replace(/\{name\}/gi, p.fullName || 'Sanjay');
+    }
+
+    const comp = company && company !== 'your team' ? company : 'your team';
+    const targetRole = role || 'Software Engineer';
+
+    return `I am very excited about what ${comp} is building and would love to contribute directly as a ${targetRole}. As a 2025 Computer Science graduate with strong foundations in TypeScript, React, Next.js, and backend services, I focus on shipping high-performance web applications and solving complex algorithmic challenges. I ramp up quickly, take end-to-end ownership of features, and thrive in fast-paced product engineering. I would welcome the opportunity to discuss how my technical skills and enthusiasm can support ${comp}'s product goals. Thank you!`;
+  }
+
+  /**
+   * Live Gemini 1.5 Flash AI generation for tailored recruiter notes.
+   */
+  async function generateWithGemini(apiKey, company, role, snippet, p) {
+    try {
+      const prompt = `You are a professional software engineer candidate applying for a job on Wellfound / careers portal.
+Write a personalized, compelling, concise "Note to Recruiter" / "What interests you about working for this company?" response (3 to 4 sentences).
+Target Company: ${company}
+Target Role: ${role}
+Job/Company Snippet from Page: ${snippet}
+Candidate Info: ${p.fullName || 'Sanjay Surya'}, 2025 Computer Science graduate. Core skills: TypeScript, React, Next.js, Node.js, PostgreSQL, System Design, DSA. High velocity, fast learner.
+Guidelines:
+1. Reference the company name and what they build specifically based on the snippet.
+2. Connect candidate's technical skills (React/Next.js/TypeScript/Node) to the company's needs.
+3. Be professional, authentic, confident, and direct.
+4. Do NOT use placeholders, brackets, or generic buzzwords. Output only the message body.`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text && text.trim().length > 20) {
+          return text.trim();
+        }
+      }
+    } catch (err) {
+      console.warn('[Winter Arc] Gemini AI live generation failed, falling back to smart template:', err);
+    }
+    return null;
+  }
 
   /**
    * Sets value on an input/textarea and triggers React / Vue / Angular synthetic events.
@@ -168,7 +292,7 @@
   /**
    * Main Autofill Engine
    */
-  function runAutofill(profileData) {
+  async function runAutofill(profileData) {
     const p = { ...DEFAULT_PROFILE, ...profileData };
     let filledCount = 0;
 
@@ -285,7 +409,6 @@
         if (el.tagName === 'SELECT') {
           if (setSelectValue(el, '0') || setSelectValue(el, '1')) filledCount++;
         } else {
-          // Fill 0 or 1 for entry level
           if (setNativeValue(el, p.experienceYears || '0')) filledCount++;
         }
         continue;
@@ -351,7 +474,30 @@
         continue;
       }
 
-      // --- SUMMARY / COVER LETTER / NOTES ---
+      // --- WELLFOUND / RECRUITER NOTE: "WHAT INTERESTS YOU ABOUT WORKING FOR THIS COMPANY?" ---
+      const isWhyCompanyQuestion =
+        el.tagName === 'TEXTAREA' &&
+        /\b(what\s+interests\s+you|why\s+(do\s+you\s+want\s+to\s+work|are\s+you\s+interested|join)|note\s+to\s+(recruiter|hiring|team)|about\s+working\s+for\s+this\s+company|pitch|tell\s+the\s+company\s+why)\b/i.test(ctx);
+
+      if (isWhyCompanyQuestion) {
+        const meta = detectCompanyAndRole();
+        let note = null;
+
+        if (p.geminiApiKey && p.geminiApiKey.trim().length > 10) {
+          setNativeValue(el, `✨ Generating tailored note with AI for ${meta.company}...`);
+          const snippet = getJobSnippet();
+          note = await generateWithGemini(p.geminiApiKey.trim(), meta.company, meta.role, snippet, p);
+        }
+
+        if (!note) {
+          note = generateTailoredCompanyNote(meta.company, meta.role, p);
+        }
+
+        if (setNativeValue(el, note)) filledCount++;
+        continue;
+      }
+
+      // --- GENERAL SUMMARY / COVER LETTER / NOTES ---
       if (el.tagName === 'TEXTAREA' && /\b(summary|cover\s*letter|tell\s+us|notes|additional)\b/i.test(ctx)) {
         if (setNativeValue(el, p.summary)) filledCount++;
         continue;
@@ -416,8 +562,10 @@
   // Listen for messages from popup or background service worker
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'AUTOFILL') {
-      const count = runAutofill(message.profile || {});
-      sendResponse({ success: true, count: count });
+      runAutofill(message.profile || {}).then((count) => {
+        sendResponse({ success: true, count: count });
+      });
+      return true; // Keep channel open for async response
     }
     return true;
   });

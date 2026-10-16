@@ -45,6 +45,8 @@ const FIELDS = [
   'currentCTC',
   'authorizedInIndia',
   'sponsorshipNeeded',
+  'customWhyCompanyNote',
+  'geminiApiKey',
 ];
 
 function getFormProfile() {
